@@ -6,10 +6,6 @@ using System.Threading.Tasks;
 
 namespace PathfinderCombatSimulator
 {
-    public class BattleResults
-    {
-        public List<CombatTeam> Groups { get; set; }
-    }
 
     public class CombatAlgorithm : ICombatAlgorithm
     {
@@ -36,11 +32,12 @@ namespace PathfinderCombatSimulator
             while (IsCombatStillActive(combatGroups))
             {
                 _ui.TurnStarts(turnId);
+                Dictionary<Mob, int> previousAttackCountForMobThisTurn = new();
                 foreach ((Mob mob, int initiativeRoll) item in sortedInitiative)
                 {
-                    if (HasAvailableActionThisTurn(item.mob)) ProcessAction(1, item.mob, combatGroups);
-                    if (HasAvailableActionThisTurn(item.mob)) ProcessAction(2, item.mob, combatGroups);
-                    if (HasAvailableActionThisTurn(item.mob)) ProcessAction(3, item.mob, combatGroups);
+                    if (HasAvailableActionThisTurn(item.mob)) ProcessAction(1, item.mob, combatGroups, previousAttackCountForMobThisTurn);
+                    if (HasAvailableActionThisTurn(item.mob)) ProcessAction(2, item.mob, combatGroups, previousAttackCountForMobThisTurn);
+                    if (HasAvailableActionThisTurn(item.mob)) ProcessAction(3, item.mob, combatGroups, previousAttackCountForMobThisTurn);
                 }
                 _ui.TurnEnds(turnId);
 
@@ -50,20 +47,19 @@ namespace PathfinderCombatSimulator
             return new BattleResults() { Groups = combatGroups };
         }
 
-        private bool HasAvailableActionThisTurn(Mob mob)
-        {
-            return true;
-        }
+        private bool HasAvailableActionThisTurn(Mob mob) => true;
 
-        private void ProcessAction(int actionNumber, Mob mob, List<CombatTeam> combatGroups)
+        private void ProcessAction(int actionNumber, Mob mob, List<CombatTeam> combatGroups, Dictionary<Mob, int> previousAttackCountForMobThisTurn)
         {
             Mob? targetMob = _ai.GetTargetFor(mob, combatGroups);
 
             if (targetMob == null || _combat.IsDead(mob) || _combat.IsUnconcious(mob)) return;
 
-            AttackResults? results = Attack(mob, targetMob);
+            AttackResults? results = Attack(mob, targetMob, previousAttackCountForMobThisTurn[mob]);
 
-            if (results?.TargetMob != null)
+            if (results?.TargetMob == null) 
+                _ui.AttackMisses(mob, targetMob);
+            else
             {
                 if (results.DamageDelivered <= 0) return;
 
@@ -72,19 +68,14 @@ namespace PathfinderCombatSimulator
                 _ui.ReceiveDamage(results);
                 if (_combat.IsDead(results.TargetMob)) _ui.Die(results.TargetMob);
                 if (_combat.IsUnconcious(results.TargetMob)) _ui.KnockOut(results.TargetMob);
-
-            }
-            else
-            {
-                _ui.AttackMisses(mob, targetMob);
             }
         }
 
-        private AttackResults? Attack(Mob mob, Mob victim)
+        private AttackResults? Attack(Mob mob, Mob victim, int numberOfPreviousAttacksMadeThisTurn)
         {
             if (mob.Attack != null)
             {
-                int attackValue = mob.Attack.RollToHit();
+                int attackValue = mob.Attack.RollToHit(numberOfPreviousAttacksMadeThisTurn);
                 if (attackValue > victim.CurrentArmorClass)
                 {
                     var returnable = new AttackResults();
@@ -137,6 +128,6 @@ namespace PathfinderCombatSimulator
 
 
         public int RollInitiative(Mob actor) =>
-            actor.CalculateCurrentInitiativeModifier() + _rng.Roll(20);
+            actor.PerceptionSkillCheckModifier + _rng.Roll(20);
     }
 }

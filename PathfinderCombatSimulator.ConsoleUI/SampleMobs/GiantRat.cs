@@ -2,14 +2,8 @@
 {
     public class GiantRat : Mob
     {
-        public GiantRat(IDiceManager rng, string id)
+        public GiantRat(IDiceManager rng, string id) : base(id, 8, 15, 5, new GiantRatBiteAttack(rng))
         {
-            Id = id;
-            Attack = new GiantRatBiteAttack(rng);
-
-            MaxHitPoints = 8;
-            CurrentArmorClass = 15;
-            PerceptionSkillCheckModifier = 5;
         }
     }
 

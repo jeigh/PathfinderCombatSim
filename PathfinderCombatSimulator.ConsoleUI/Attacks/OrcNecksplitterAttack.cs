@@ -11,14 +11,10 @@ namespace PathfinderCombatSimulator
             _rng = rng;
         }
 
-        public int RollDamage()
-        {
-            return _rng.Roll(8) + 4;
-        }
+        public int RollDamage() => 
+            _rng.Roll(8) + 4;
 
-        public int RollToHit()
-        {
-            return _rng.Roll(20) + 7;
-        }
+        public int RollToHit(int numberOfPreviousAttacksThisTurn) => 
+            _rng.Roll(20) + 7 - (numberOfPreviousAttacksThisTurn * 5);
     }
 }

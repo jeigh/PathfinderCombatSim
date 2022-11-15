@@ -4,21 +4,10 @@ namespace PathfinderCombatSimulator
 {
     public class OrcBrute : Mob
     {
-        private readonly IDiceManager _rng;
-
-        public OrcBrute(IDiceManager rng, string id)
+        public OrcBrute(IDiceManager rng, string id) : base(id, 23, 15, 0, new OrcKnuckleDaggerAttack(rng))
         {
-            _rng = rng;
-            Id = id;
-            Attack = new OrcKnuckleDaggerAttack(_rng);
 
-            MaxHitPoints = 23;
-            CurrentArmorClass = 15;
-            PerceptionSkillCheckModifier = 0;
         }
-
-        
-
     }
 
 }

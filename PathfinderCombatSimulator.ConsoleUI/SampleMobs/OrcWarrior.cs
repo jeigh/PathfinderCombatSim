@@ -4,17 +4,9 @@ namespace PathfinderCombatSimulator
 {
     public class OrcWarrior : Mob
     {
-        private readonly IDiceManager _rng;
-
-        public OrcWarrior(IDiceManager rng, string id)
+        public OrcWarrior(IDiceManager rng, string id) : base(id, 23, 18, 0,  new OrcNecksplitterAttack(rng))
         {
-            _rng = rng;
-            Id = id;
-            Attack = new OrcNecksplitterAttack(_rng);
 
-            MaxHitPoints = 23;
-            CurrentArmorClass = 18;
-            PerceptionSkillCheckModifier = 0;
         }
         
 

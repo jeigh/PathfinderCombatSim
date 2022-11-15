@@ -12,8 +12,8 @@
         public int RollDamage() =>
             _rng.Roll(6) + 1;
 
-        public int RollToHit() => 
-            _rng.Roll(20) + 7;
+        public int RollToHit(int numberOfPreviousAttacksThisTurn) => 
+            _rng.Roll(20) + 7 - (numberOfPreviousAttacksThisTurn * 5);
     }
 
 

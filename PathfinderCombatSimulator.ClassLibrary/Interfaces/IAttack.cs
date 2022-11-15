@@ -3,6 +3,6 @@
     public interface IAttack
     {
         int RollDamage();
-        int RollToHit();
+        int RollToHit(int numberOfPreviousAttacksThisTurn);
     }
 }

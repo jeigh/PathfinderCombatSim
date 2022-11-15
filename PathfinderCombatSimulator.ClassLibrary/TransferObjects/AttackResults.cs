@@ -2,8 +2,8 @@
 {
     public class AttackResults
     {
-        public int DamageDelivered { get; set; }
-        public Mob TargetMob { get; set; }
-        public Mob AttackingMob { get; set; }
+        public int DamageDelivered { get; set; } = 0;
+        public Mob? TargetMob { get; set; }
+        public Mob? AttackingMob { get; set; }
     }
 }
