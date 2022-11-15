@@ -10,9 +10,9 @@
             _combat = combat;
         }
 
-        public Mob? GetTargetFor(Mob item, List<AlliedCombatGroup> acgs)
+        public Mob? GetTargetFor(Mob item, List<CombatTeam> acgs)
         {
-            foreach (AlliedCombatGroup combatGroup in acgs)
+            foreach (CombatTeam combatGroup in acgs)
             {
                 if (combatGroup.Contains(item)) continue;
                 else
@@ -26,5 +26,34 @@
             return null;
         }
 
+        public int MobBravery(Mob mob)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool MobIsPacifist(Mob mob)
+        {
+            throw new NotImplementedException();
+        }
+
+        public int MobMeleePreferenceWeight(Mob mob)
+        {
+            throw new NotImplementedException();
+        }
+
+        public int MobRangedPreferenceWeight(Mob mob)
+        {
+            throw new NotImplementedException();
+        }
+
+        public int MobSpellPreferenceWeight(Mob mob)
+        {
+            throw new NotImplementedException();
+        }
+
+        public int MobStealthPreferenceWeight(Mob mob)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

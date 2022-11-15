@@ -10,7 +10,7 @@ ICombatHelper _combat = new CombatHelper(_rng);
 IMobAI _ai = new MobAI(_combat);
 
 var theAlgorithm = new CombatAlgorithm(_rng, _ui, _combat, _ai);
-List<AlliedCombatGroup> combatGroups = GenerateCombatGroups(_rng);
+List<CombatTeam> combatGroups = GenerateCombatGroups(_rng);
 Dictionary<string, int> winners = InitializeWinners(combatGroups);
 
 for (int i = 0; i < 100; i++)
@@ -22,7 +22,7 @@ for (int i = 0; i < 100; i++)
 
     if (_combat.OnlyOneLivingACG(combatGroups))
     {
-        string? victorName = _combat.GetWinningAcg(combatGroups)?.AcgName;
+        string? victorName = _combat.GetWinningAcg(combatGroups)?.Name;
 
         if (!string.IsNullOrWhiteSpace(victorName))
         {
@@ -38,22 +38,22 @@ for (int i = 0; i < 100; i++)
 
 _ui.OutputAggregates(winners);
 
-static List<AlliedCombatGroup> GenerateCombatGroups(IDiceManager _rng)
+static List<CombatTeam> GenerateCombatGroups(IDiceManager _rng)
 {
 
-    var firstCombatGroup = new AlliedCombatGroup("Ug's team");
+    var firstCombatGroup = new CombatTeam("Ug's team");
     //firstCombatGroup.Combatants.Add(new OrcWarrior(_rng, "Ug the Warrior"));
     //firstCombatGroup.Combatants.Add(new OrcWarrior(_rng, "Grubs the Warrior"));
 
     firstCombatGroup.Combatants.Add(new OrcWarCheif(_rng, "Ug the Warcheif"));
 
-    var secondCombatGroup = new AlliedCombatGroup("Bolg's Team");
+    var secondCombatGroup = new CombatTeam("Bolg's Team");
     secondCombatGroup.Combatants.Add(new OrcBrute(_rng, "Bolg the brute"));
     secondCombatGroup.Combatants.Add(new OrcBrute(_rng, "Ugthar the brute"));
     secondCombatGroup.Combatants.Add(new OrcBrute(_rng, "Thag the brute"));
     //secondCombatGroup.Combatants.Add(new OrcBrute(_rng, "Carnog the brute"));
 
-    var combatGroups = new List<AlliedCombatGroup>();
+    var combatGroups = new List<CombatTeam>();
 
     combatGroups.Add(firstCombatGroup);
     combatGroups.Add(secondCombatGroup);
@@ -61,12 +61,12 @@ static List<AlliedCombatGroup> GenerateCombatGroups(IDiceManager _rng)
     return combatGroups;
 }
 
-static Dictionary<string, int> InitializeWinners(List<AlliedCombatGroup> combatGroups)
+static Dictionary<string, int> InitializeWinners(List<CombatTeam> combatGroups)
 {
     Dictionary<string, int> winners = new();
-    foreach (AlliedCombatGroup acg in combatGroups)
+    foreach (CombatTeam acg in combatGroups)
     {
-        winners.Add(acg.AcgName, 0);
+        winners.Add(acg.Name, 0);
     }
 
     return winners;

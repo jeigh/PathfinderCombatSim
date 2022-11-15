@@ -15,9 +15,9 @@
         public bool IsUnconcious(Mob theMob) =>
             (theMob.CurrentHitPoints > -10 && theMob.CurrentHitPoints <= 0);
 
-        public bool OnlyOneLivingACG(List<AlliedCombatGroup> combatGroups)
+        public bool OnlyOneLivingACG(List<CombatTeam> combatGroups)
         {
-            IEnumerable<AlliedCombatGroup> enumerable()
+            IEnumerable<CombatTeam> enumerable()
             {
                 foreach (var cg in combatGroups)
                 {
@@ -31,7 +31,7 @@
             return enumerable().Count() == 1;
         }
 
-        private bool CombatGroupStillAlive(AlliedCombatGroup combatGroup)
+        private bool CombatGroupStillAlive(CombatTeam combatGroup)
         {
             bool alive = false;
             foreach (Mob combatant in combatGroup.Combatants)
@@ -41,9 +41,9 @@
             return alive;
         }
 
-        public void ResetCombatGroups(List<AlliedCombatGroup> combatGroups)
+        public void ResetCombatGroups(List<CombatTeam> combatGroups)
         {
-            foreach(AlliedCombatGroup combatGroup in combatGroups)
+            foreach(CombatTeam combatGroup in combatGroups)
             {
                 foreach(Mob combatant in combatGroup.Combatants)
                 {
@@ -55,9 +55,9 @@
         public void ResetMob(Mob combatant) =>
             combatant.CurrentHitPoints = combatant.MaxHitPoints;
 
-        public AlliedCombatGroup? GetWinningAcg(List<AlliedCombatGroup> combatGroups)
+        public CombatTeam? GetWinningAcg(List<CombatTeam> combatGroups)
         {
-            foreach(AlliedCombatGroup acg in combatGroups)
+            foreach(CombatTeam acg in combatGroups)
             {
                 if (CombatGroupStillAlive(acg)) return acg;
             }

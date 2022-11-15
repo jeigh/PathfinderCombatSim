@@ -3,15 +3,15 @@
     public interface ICombatHelper
     {
 
-        AlliedCombatGroup? GetWinningAcg(List<AlliedCombatGroup> combatGroups);
+        CombatTeam? GetWinningAcg(List<CombatTeam> combatGroups);
         
         bool IsDead(Mob theMob);
         
         bool IsUnconcious(Mob theMob);
         
-        bool OnlyOneLivingACG(List<AlliedCombatGroup> combatGroups);
+        bool OnlyOneLivingACG(List<CombatTeam> combatGroups);
 
-        void ResetCombatGroups(List<AlliedCombatGroup> combatGroups);
+        void ResetCombatGroups(List<CombatTeam> combatGroups);
 
         void ResetMob(Mob combatant);
     }

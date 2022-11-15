@@ -1,13 +1,13 @@
 ﻿namespace PathfinderCombatSimulator
 {
-    public class AlliedCombatGroup
+    public class CombatTeam
     {
-        public AlliedCombatGroup(string acgName)
+        public CombatTeam(string acgName)
         {
-            AcgName = acgName;
+            Name = acgName;
         }
 
-        public string AcgName { get; set; }
+        public string Name { get; set; }
 
         public List<Mob> Combatants { get; set; } = new List<Mob>();
 

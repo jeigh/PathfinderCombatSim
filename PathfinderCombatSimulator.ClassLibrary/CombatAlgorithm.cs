@@ -9,7 +9,7 @@ namespace PathfinderCombatSimulator
     public class CombatResults
     {
         //public List<Mob> Combatants { get; set; }
-        public List<AlliedCombatGroup> Groups { get; set; }
+        public List<CombatTeam> Groups { get; set; }
     }
 
     public class CombatAlgorithm : ICombatAlgorithm
@@ -30,7 +30,7 @@ namespace PathfinderCombatSimulator
             _ai = ai;
         }
 
-        public CombatResults ExecuteCombat(List<AlliedCombatGroup> combatGroups)
+        public CombatResults ExecuteCombat(List<CombatTeam> combatGroups)
         {
             if (combatGroups.Count != 2) throw new NotImplementedException();
 
@@ -42,27 +42,9 @@ namespace PathfinderCombatSimulator
                 _ui.TurnStarts(turnId);
                 foreach ((Mob mob, int initiativeRoll) item in sortedInitiative)
                 {
-                    Mob? targetMob = _ai.GetTargetFor(item.mob, combatGroups);
-
-                    if (targetMob == null || _combat.IsDead(item.mob) || _combat.IsUnconcious(item.mob)) continue;
-                    
-                    AttackResults? results = Attack(item.mob, targetMob);
-
-                    if (results?.TargetMob != null)
-                    {
-                        if (results.DamageDelivered <= 0) continue;
-
-                        results.TargetMob.CurrentHitPoints -= results.DamageDelivered;
-
-                        _ui.ReceiveDamage(results);
-                        if (_combat.IsDead(results.TargetMob)) _ui.Die(results.TargetMob);
-                        if (_combat.IsUnconcious(results.TargetMob)) _ui.KnockOut(results.TargetMob);
-
-                    }
-                    else
-                    {
-                        _ui.AttackMisses(item.mob, targetMob);
-                    }
+                    if (HasAvailableActionThisTurn(item.mob)) ProcessAction(1, item.mob, combatGroups);
+                    if (HasAvailableActionThisTurn(item.mob)) ProcessAction(2, item.mob, combatGroups);
+                    if (HasAvailableActionThisTurn(item.mob)) ProcessAction(3, item.mob, combatGroups);
                 }
                 _ui.TurnEnds(turnId);
 
@@ -72,13 +54,42 @@ namespace PathfinderCombatSimulator
             return new CombatResults() { Groups = combatGroups };
         }
 
+        private bool HasAvailableActionThisTurn(Mob mob)
+        {
+            return true;
+        }
+
+        private void ProcessAction(int actionNumber, Mob mob, List<CombatTeam> combatGroups)
+        {
+            Mob? targetMob = _ai.GetTargetFor(mob, combatGroups);
+
+            if (targetMob == null || _combat.IsDead(mob) || _combat.IsUnconcious(mob)) return;
+
+            AttackResults? results = Attack(mob, targetMob);
+
+            if (results?.TargetMob != null)
+            {
+                if (results.DamageDelivered <= 0) return;
+
+                results.TargetMob.CurrentHitPoints -= results.DamageDelivered;
+
+                _ui.ReceiveDamage(results);
+                if (_combat.IsDead(results.TargetMob)) _ui.Die(results.TargetMob);
+                if (_combat.IsUnconcious(results.TargetMob)) _ui.KnockOut(results.TargetMob);
+
+            }
+            else
+            {
+                _ui.AttackMisses(mob, targetMob);
+            }
+        }
+
         private AttackResults? Attack(Mob mob, Mob victim)
         {
             var attackValue = mob.Attack.RollToHit();
             if (attackValue > victim.CurrentArmorClass)
             {
                 var returnable = new AttackResults();
-
                 int damageRoll = mob.Attack.RollDamage();
 
                 returnable.AttackingMob = mob;
@@ -90,7 +101,7 @@ namespace PathfinderCombatSimulator
             return null;
         }
 
-        public List<(Mob mob, int initiativeRoll)> RollAndOrderByInitiative(List<AlliedCombatGroup> groups)
+        public List<(Mob mob, int initiativeRoll)> RollAndOrderByInitiative(List<CombatTeam> groups)
         {
             List<(Mob mob, int initiativeRoll)> initiativeTable = new List<(Mob mob, int initiativeRoll)>();
 
@@ -106,17 +117,17 @@ namespace PathfinderCombatSimulator
         }
 
 
-        public bool IsCombatStillActive(List<AlliedCombatGroup> combatGroups)
+        public bool IsCombatStillActive(List<CombatTeam> combatGroups)
         {
             var count = 0;
-            foreach(AlliedCombatGroup combatGroup in combatGroups)
+            foreach(CombatTeam combatGroup in combatGroups)
             {
                 if (StillLives(combatGroup)) count++;
             }
             return (count > 1);
         }
 
-        private bool StillLives(AlliedCombatGroup acg)
+        private bool StillLives(CombatTeam acg)
         {
             foreach (Mob mob in acg.Combatants)
             {
