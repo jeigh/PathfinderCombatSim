@@ -1,6 +1,4 @@
-﻿using PathfinderCombatSimulator.ConsoleUI;
-
-namespace PathfinderCombatSimulator
+﻿namespace PathfinderCombatSimulator.Data.Attacks
 {
 
     public class OrcGreatClubAttack : IAttack

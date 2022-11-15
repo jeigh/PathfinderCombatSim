@@ -1,4 +1,6 @@
-﻿namespace PathfinderCombatSimulator
+﻿using PathfinderCombatSimulator.Data.Attacks;
+
+namespace PathfinderCombatSimulator.Data.Mobs
 {
     public class GiantRat : Mob
     {

@@ -1,8 +1,7 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using PathfinderCombatSimulator;
 using PathfinderCombatSimulator.ConsoleUI;
-
-
+using PathfinderCombatSimulator.Data.Mobs;
 
 IDiceManager _rng = new DiceManager();
 IUserInterface _ui = new UserInterface();

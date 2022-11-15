@@ -1,6 +1,6 @@
-﻿using PathfinderCombatSimulator.ConsoleUI;
+﻿using PathfinderCombatSimulator.Data.Attacks;
 
-namespace PathfinderCombatSimulator
+namespace PathfinderCombatSimulator.Data.Mobs
 {
     public class OrcWarrior : Mob
     {

@@ -1,6 +1,6 @@
-﻿using PathfinderCombatSimulator.ConsoleUI;
+﻿using PathfinderCombatSimulator.Data;
 
-namespace PathfinderCombatSimulator
+namespace PathfinderCombatSimulator.Data.Attacks
 {
     public class OrcKnuckleDaggerAttack : IAttack
     {
