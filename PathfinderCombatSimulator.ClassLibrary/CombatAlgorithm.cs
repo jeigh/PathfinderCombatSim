@@ -86,17 +86,20 @@ namespace PathfinderCombatSimulator
 
         private AttackResults? Attack(Mob mob, Mob victim)
         {
-            var attackValue = mob.Attack.RollToHit();
-            if (attackValue > victim.CurrentArmorClass)
+            if (mob.Attack != null)
             {
-                var returnable = new AttackResults();
-                int damageRoll = mob.Attack.RollDamage();
+                int attackValue = mob.Attack.RollToHit();
+                if (attackValue > victim.CurrentArmorClass)
+                {
+                    var returnable = new AttackResults();
+                    int damageRoll = mob.Attack.RollDamage();
 
-                returnable.AttackingMob = mob;
-                returnable.TargetMob = victim;
-                returnable.DamageDelivered = damageRoll;
+                    returnable.AttackingMob = mob;
+                    returnable.TargetMob = victim;
+                    returnable.DamageDelivered = damageRoll;
 
-                return returnable;
+                    return returnable;
+                }
             }
             return null;
         }
@@ -138,6 +141,6 @@ namespace PathfinderCombatSimulator
 
 
         public int RollInitiative(Mob actor) =>
-            actor.CurrentInitiativeModifier + _rng.Roll(10);
+            actor.CalculateCurrentInitiativeModifier() + _rng.Roll(20);
     }
 }

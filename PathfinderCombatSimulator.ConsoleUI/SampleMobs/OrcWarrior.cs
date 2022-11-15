@@ -14,7 +14,7 @@ namespace PathfinderCombatSimulator
 
             MaxHitPoints = 23;
             CurrentArmorClass = 18;
-            CurrentInitiativeModifier = 0;
+            PerceptionSkillCheckModifier = 0;
         }
         
 
