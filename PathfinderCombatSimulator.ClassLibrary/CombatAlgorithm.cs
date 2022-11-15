@@ -6,21 +6,17 @@ using System.Threading.Tasks;
 
 namespace PathfinderCombatSimulator
 {
-    public class CombatResults
+    public class BattleResults
     {
-        //public List<Mob> Combatants { get; set; }
         public List<CombatTeam> Groups { get; set; }
     }
 
     public class CombatAlgorithm : ICombatAlgorithm
     {
-
-
         private readonly IDiceManager _rng;
         private readonly IUserInterface _ui;
         private readonly ICombatHelper _combat;
         private readonly IMobAI _ai;
-        
 
         public CombatAlgorithm(IDiceManager rng, IUserInterface ui, ICombatHelper combat, IMobAI ai)
         {
@@ -30,7 +26,7 @@ namespace PathfinderCombatSimulator
             _ai = ai;
         }
 
-        public CombatResults ExecuteCombat(List<CombatTeam> combatGroups)
+        public BattleResults ProcessBattleUntilOnlyOneTeamIsConcious(List<CombatTeam> combatGroups)
         {
             if (combatGroups.Count != 2) throw new NotImplementedException();
 
@@ -51,7 +47,7 @@ namespace PathfinderCombatSimulator
                 turnId++;
             }
             
-            return new CombatResults() { Groups = combatGroups };
+            return new BattleResults() { Groups = combatGroups };
         }
 
         private bool HasAvailableActionThisTurn(Mob mob)

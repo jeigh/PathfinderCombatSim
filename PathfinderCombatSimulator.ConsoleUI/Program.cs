@@ -18,7 +18,7 @@ for (int i = 0; i < 100; i++)
     _ui.Flush();
     _combat.ResetCombatGroups(combatGroups);
 
-    CombatResults? result = theAlgorithm.ExecuteCombat(combatGroups);
+    BattleResults? result = theAlgorithm.ProcessBattleUntilOnlyOneTeamIsConcious(combatGroups);
 
     if (_combat.OnlyOneLivingACG(combatGroups))
     {

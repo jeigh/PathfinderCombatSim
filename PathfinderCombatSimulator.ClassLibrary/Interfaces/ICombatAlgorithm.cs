@@ -2,6 +2,6 @@
 {
     public interface ICombatAlgorithm
     {
-        CombatResults ExecuteCombat(List<CombatTeam> combatGroups);
+        BattleResults ProcessBattleUntilOnlyOneTeamIsConcious(List<CombatTeam> combatGroups);
     }
 }
