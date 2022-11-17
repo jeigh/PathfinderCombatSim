@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\PathfinderCombatSimulator.ClassLibrary\PathfinderCombatSimulator.ClassLibrary.csproj" />
-    <ProjectReference Include="..\PathfinderCombatSimulator.Data\PathfinderCombatSimulator.Data.csproj" />
+    <ProjectReference Include="..\PathfinderCombatSimulator.Data\PathfinderCombatSimulator.StaticDefinitions.csproj" />
   </ItemGroup>
 
 </Project>

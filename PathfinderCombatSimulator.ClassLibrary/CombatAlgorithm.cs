@@ -55,7 +55,10 @@ namespace PathfinderCombatSimulator
 
             if (targetMob == null || _combat.IsDead(mob) || _combat.IsUnconcious(mob)) return;
 
-            AttackResults? results = Attack(mob, targetMob, previousAttackCountForMobThisTurn[mob]);
+            int prevAttacks = 0;
+            var abc = previousAttackCountForMobThisTurn.TryGetValue(mob, out prevAttacks);
+
+            AttackResults? results = Attack(mob, targetMob, prevAttacks);
 
             if (results?.TargetMob == null) 
                 _ui.AttackMisses(mob, targetMob);
@@ -79,11 +82,19 @@ namespace PathfinderCombatSimulator
                 if (attackValue > victim.CurrentArmorClass)
                 {
                     var returnable = new AttackResults();
-                    int damageRoll = mob.Attack.RollDamage();
+                    var damageRoll = mob.Attack.RollDamage();
 
-                    returnable.AttackingMob = mob;
-                    returnable.TargetMob = victim;
-                    returnable.DamageDelivered = damageRoll;
+                    //todo: update this to work with more than just physical damage...
+                    if (damageRoll.ContainsKey(ClassLibrary.Constants.DamageType.Physical) )
+                    {
+                        returnable.AttackingMob = mob;
+                        returnable.TargetMob = victim;
+                        returnable.DamageDelivered = damageRoll[ClassLibrary.Constants.DamageType.Physical];
+                    }
+
+                    //todo: apply saving throw feature
+                    
+
 
                     return returnable;
                 }

@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PathfinderCombatSimulator.C
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PathfinderCombatSimulator.ClassLibrary", "PathfinderCombatSimulator.ClassLibrary\PathfinderCombatSimulator.ClassLibrary.csproj", "{B356EF2C-D223-48E7-A5CB-E1BBCF2CC0E8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PathfinderCombatSimulator.Data", "PathfinderCombatSimulator.Data\PathfinderCombatSimulator.Data.csproj", "{B751BCDF-CD52-4905-A0C9-457363A01393}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PathfinderCombatSimulator.StaticDefinitions", "PathfinderCombatSimulator.Data\PathfinderCombatSimulator.StaticDefinitions.csproj", "{B751BCDF-CD52-4905-A0C9-457363A01393}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

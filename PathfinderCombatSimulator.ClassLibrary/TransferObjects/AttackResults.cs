@@ -6,4 +6,5 @@
         public Mob? TargetMob { get; set; }
         public Mob? AttackingMob { get; set; }
     }
+
 }

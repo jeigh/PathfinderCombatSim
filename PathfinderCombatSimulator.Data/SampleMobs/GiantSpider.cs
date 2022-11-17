@@ -3,32 +3,32 @@ using PathfinderCombatSimulator.ClassLibrary.Constants;
 
 namespace PathfinderCombatSimulator.StaticDefinitions.Mobs
 {
-    public class OrcBrute : Mob
+    public class GiantSpider : Mob
     {
-        public OrcBrute(IDiceManager rng, string id) : base(id, 23, 15, 0, new OrcKnuckleDaggerAttack(rng))
+        public GiantSpider(IDiceManager rng, string id) : base(id, 16, 17, 7, new FangsAttack(rng))
         {
-
         }
 
-        public class OrcKnuckleDaggerAttack : IAttack
+        public class FangsAttack : IAttack 
         {
             private readonly IDiceManager _rng;
 
-            public OrcKnuckleDaggerAttack(IDiceManager rng)
+            public FangsAttack(IDiceManager rng)
             {
                 _rng = rng;
-
+                
                 List<DieRoll> theDamageDice = new List<DieRoll>
                 {
                     new DieRoll()
                     {
                         DieCount = 1,
                         DieSize = 6,
-                        ModiferAfterAddition = 3
+                        ModiferAfterAddition = 2
                     }
                 };
 
                 _damageEffect = new DamageEffect { DamageDice = theDamageDice, DamageType = DamageType.Physical };
+
             }
 
             private readonly DamageEffect _damageEffect;
@@ -40,9 +40,10 @@ namespace PathfinderCombatSimulator.StaticDefinitions.Mobs
                 return returnable;
             }
 
+
+
             public int RollToHit(int numberOfPreviousAttacksThisTurn) =>
-                _rng.Roll(20) + 3 - (numberOfPreviousAttacksThisTurn * 5);
+                _rng.Roll(20) + 9;
         }
     }
-
 }
