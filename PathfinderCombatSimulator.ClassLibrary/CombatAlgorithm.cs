@@ -74,11 +74,15 @@ namespace PathfinderCombatSimulator
             }
         }
 
+        public int RollToHit(int numberOfPreviousAttacksThisTurn, int attackModifier) =>
+            _rng.Roll(20) + attackModifier - (numberOfPreviousAttacksThisTurn * 5);
+
+
         private AttackResults? Attack(Mob mob, Mob victim, int numberOfPreviousAttacksMadeThisTurn)
         {
             if (mob.DefaultAttack != null)
             {
-                int attackValue = mob.DefaultAttack.RollToHit(numberOfPreviousAttacksMadeThisTurn);
+                int attackValue = RollToHit(numberOfPreviousAttacksMadeThisTurn, mob.DefaultAttack.AttackModifier);
                 if (attackValue > victim.CurrentArmorClass)
                 {
                     var returnable = new AttackResults();

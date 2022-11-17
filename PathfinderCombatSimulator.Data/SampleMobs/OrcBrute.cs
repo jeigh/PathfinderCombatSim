@@ -5,19 +5,16 @@ namespace PathfinderCombatSimulator.StaticDefinitions.Mobs
 {
     public class OrcBrute : Mob
     {
-        public OrcBrute(IDiceManager rng, string id) : base(id, 23, 15, 0, new OrcKnuckleDaggerAttack(rng))
+        public OrcBrute(IDiceManager rng, string id) : base(id, 23, 15, 0, new OrcKnuckleDaggerAttack())
         {
 
         }
 
         public class OrcKnuckleDaggerAttack : IAttack
         {
-            private readonly IDiceManager _rng;
 
-            public OrcKnuckleDaggerAttack(IDiceManager rng)
+            public OrcKnuckleDaggerAttack()
             {
-                _rng = rng;
-
                 List<DieRoll> theDamageDice = new List<DieRoll>
                 {
                     new DieRoll()
@@ -34,8 +31,8 @@ namespace PathfinderCombatSimulator.StaticDefinitions.Mobs
 
             public IList<DamageEffect> DamageEffects { get; set; } = new List<DamageEffect>();
 
-            public int RollToHit(int numberOfPreviousAttacksThisTurn) =>
-                _rng.Roll(20) + 3 - (numberOfPreviousAttacksThisTurn * 5);
+            public int AttackModifier { get; set; } = 3;
+
         }
     }
 

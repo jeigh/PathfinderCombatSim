@@ -5,20 +5,18 @@ namespace PathfinderCombatSimulator.StaticDefinitions.Mobs
 {
     public class GiantSpider : Mob
     {
-        public GiantSpider(IDiceManager rng, string id) : base(id, 16, 17, 7, new FangsAttack(rng))
+        public GiantSpider(IDiceManager rng, string id) : base(id, 16, 17, 7, new FangsAttack())
         {
         }
 
 
         public class FangsAttack : IAttack 
         {
-            private readonly IDiceManager _rng;
+
             public IAttack? DefaultAttack { get; set; }
 
-            public FangsAttack(IDiceManager rng)
+            public FangsAttack()
             {
-                _rng = rng;
-                
                 List<DieRoll> theDamageDice = new List<DieRoll>
                 {
                     new DieRoll()
@@ -35,8 +33,8 @@ namespace PathfinderCombatSimulator.StaticDefinitions.Mobs
 
             public IList<DamageEffect> DamageEffects { get; set; } = new List<DamageEffect>();
 
-            public int RollToHit(int numberOfPreviousAttacksThisTurn) =>
-                _rng.Roll(20) + 9;
+            public int AttackModifier { get; set; } = 9;
+
         }
     }
 }
