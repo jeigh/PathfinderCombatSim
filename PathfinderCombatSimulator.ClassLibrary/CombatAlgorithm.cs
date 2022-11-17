@@ -28,20 +28,20 @@ namespace PathfinderCombatSimulator
 
             List<(Mob mob, int initiativeRoll)> sortedInitiative = RollAndOrderByInitiative(combatGroups);
 
-            int turnId = 1;
+            int roundId = 1;
             while (IsCombatStillActive(combatGroups))
             {
-                _ui.TurnStarts(turnId);
-                Dictionary<Mob, int> previousAttackCountForMobThisTurn = new();
+                _ui.RoundStarts(roundId);
+                Dictionary<Mob, int> previousAttackCountForMobThisRound = new();
                 foreach ((Mob mob, int initiativeRoll) item in sortedInitiative)
                 {
-                    if (HasAvailableActionThisTurn(item.mob)) ProcessAction(1, item.mob, combatGroups, previousAttackCountForMobThisTurn);
-                    if (HasAvailableActionThisTurn(item.mob)) ProcessAction(2, item.mob, combatGroups, previousAttackCountForMobThisTurn);
-                    if (HasAvailableActionThisTurn(item.mob)) ProcessAction(3, item.mob, combatGroups, previousAttackCountForMobThisTurn);
+                    if (HasAvailableActionThisTurn(item.mob)) ProcessAction(1, item.mob, combatGroups, previousAttackCountForMobThisRound);
+                    if (HasAvailableActionThisTurn(item.mob)) ProcessAction(2, item.mob, combatGroups, previousAttackCountForMobThisRound);
+                    if (HasAvailableActionThisTurn(item.mob)) ProcessAction(3, item.mob, combatGroups, previousAttackCountForMobThisRound);
                 }
-                _ui.TurnEnds(turnId);
+                _ui.RoundEnds(roundId);
 
-                turnId++;
+                roundId++;
             }
             
             return new BattleResults() { Groups = combatGroups };

@@ -29,13 +29,13 @@
 
         }
 
-        public void TurnEnds(int turnId)
+        public void RoundEnds(int turnId)
         {
             //Console.ReadKey();
             //Console.WriteLine($"Turn {turnId} ends.");
         }
 
-        public void TurnStarts(int turnId)
+        public void RoundStarts(int turnId)
         {
             //Console.WriteLine($"Turn {turnId} begins.");
         }
