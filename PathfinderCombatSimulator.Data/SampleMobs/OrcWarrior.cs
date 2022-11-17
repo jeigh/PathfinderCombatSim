@@ -28,21 +28,21 @@ namespace PathfinderCombatSimulator.StaticDefinitions.Mobs
                     }
                 };
 
-                _damageEffect = new DamageEffect { DamageDice = theDamageDice, DamageType = DamageType.Physical };
+                _damageEffects.Add(new DamageEffect { DamageDice = theDamageDice, DamageType = DamageType.Physical });
 
             }
 
-            private readonly DamageEffect _damageEffect;
-
+            private readonly IList<DamageEffect> _damageEffects = new List<DamageEffect>();
 
             public Dictionary<DamageType, int> RollDamage()
             {
-                var returnable = new Dictionary<DamageType, int>();
-                returnable[_damageEffect.DamageType] = _rng.AddRolls(_damageEffect.DamageDice);                
-                return returnable;
+                var _damageEffect = _damageEffects.First();
 
+                var returnable = new Dictionary<DamageType, int>();
+                returnable[_damageEffect.DamageType] = _rng.AddRolls(_damageEffect.DamageDice);
+                return returnable;
             }
-                
+
 
             public int RollToHit(int numberOfPreviousAttacksThisTurn) =>
                 _rng.Roll(20) + 7 - (numberOfPreviousAttacksThisTurn * 5);
