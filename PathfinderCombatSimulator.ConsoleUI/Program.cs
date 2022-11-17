@@ -45,11 +45,13 @@ static List<CombatTeam> GenerateCombatGroups(IDiceManager _rng)
     //firstCombatGroup.Combatants.Add(new OrcWarrior(_rng, "Grubs the Warrior"));
 
     firstCombatGroup.Combatants.Add(new OrcWarCheif(_rng, "Ug the Warcheif"));
+    firstCombatGroup.Combatants.Add(new GiantRat(_rng, "rat #2"));
 
     var secondCombatGroup = new CombatTeam("Bolg's Team");
     secondCombatGroup.Combatants.Add(new OrcBrute(_rng, "Bolg the brute"));
     secondCombatGroup.Combatants.Add(new OrcBrute(_rng, "Ugthar the brute"));
     secondCombatGroup.Combatants.Add(new OrcBrute(_rng, "Thag the brute"));
+    secondCombatGroup.Combatants.Add(new GiantRat(_rng, "rat #1"));
     //secondCombatGroup.Combatants.Add(new OrcBrute(_rng, "Carnog the brute"));
 
     var combatGroups = new List<CombatTeam>();

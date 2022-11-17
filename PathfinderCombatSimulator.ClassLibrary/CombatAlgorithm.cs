@@ -55,8 +55,7 @@ namespace PathfinderCombatSimulator
 
             if (targetMob == null || _combat.IsDead(mob) || _combat.IsUnconcious(mob)) return;
 
-            int prevAttacks = 0;
-            var abc = dictionaryOfPreviousAttackCounts.TryGetValue(mob, out prevAttacks);
+            dictionaryOfPreviousAttackCounts.TryGetValue(mob, out int prevAttacks);
 
             AttackResults? results = Attack(mob, targetMob, prevAttacks);
 
