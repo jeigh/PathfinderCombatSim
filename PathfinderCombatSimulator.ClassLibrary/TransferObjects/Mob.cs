@@ -9,7 +9,7 @@
             MaxHitPoints = maxHitPoints;
             CurrentArmorClass= currentArmorClass;
             PerceptionSkillCheckModifier = perceptionSkillCheckModifier;
-            Attack = attack;
+            DefaultAttack = attack;
         }
 
         public string Id { get; set; }
@@ -17,6 +17,6 @@
         public int MaxHitPoints { get; set; }
         public int CurrentArmorClass { get; set; }
         public int PerceptionSkillCheckModifier { get; set; }
-        public IAttack? Attack { get; set; }
+        public IAttack? DefaultAttack { get; set; }
     }
 }

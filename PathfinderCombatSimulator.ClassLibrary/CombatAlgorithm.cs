@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PathfinderCombatSimulator.ClassLibrary.Constants;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -75,13 +76,13 @@ namespace PathfinderCombatSimulator
 
         private AttackResults? Attack(Mob mob, Mob victim, int numberOfPreviousAttacksMadeThisTurn)
         {
-            if (mob.Attack != null)
+            if (mob.DefaultAttack != null)
             {
-                int attackValue = mob.Attack.RollToHit(numberOfPreviousAttacksMadeThisTurn);
+                int attackValue = mob.DefaultAttack.RollToHit(numberOfPreviousAttacksMadeThisTurn);
                 if (attackValue > victim.CurrentArmorClass)
                 {
                     var returnable = new AttackResults();
-                    var damageRoll = mob.Attack.RollDamage();
+                    var damageRoll = RollDamage(mob.DefaultAttack.DamageEffects);
 
                     //todo: update this to work with more than just physical damage...
                     if (damageRoll.ContainsKey(ClassLibrary.Constants.DamageType.Physical) )
@@ -99,6 +100,23 @@ namespace PathfinderCombatSimulator
                 }
             }
             return null;
+        }
+
+        public Dictionary<DamageType, int> RollDamage(IList<DamageEffect> damageEffects)
+        {
+            var returnable = new Dictionary<DamageType, int>();
+            foreach (DamageEffect _damageEffect in damageEffects)
+            {
+                if (returnable.ContainsKey(_damageEffect.DamageType))
+                {
+                    returnable[_damageEffect.DamageType] = returnable[_damageEffect.DamageType] + _rng.AddRolls(_damageEffect.DamageDice);
+                }
+                else
+                {
+                    returnable[_damageEffect.DamageType] = _rng.AddRolls(_damageEffect.DamageDice);
+                }
+            }
+            return returnable;
         }
 
         public List<(Mob mob, int initiativeRoll)> RollAndOrderByInitiative(List<CombatTeam> groups)

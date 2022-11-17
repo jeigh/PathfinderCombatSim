@@ -9,9 +9,11 @@ namespace PathfinderCombatSimulator.StaticDefinitions.Mobs
         {
         }
 
+
         public class FangsAttack : IAttack 
         {
             private readonly IDiceManager _rng;
+            public IAttack? DefaultAttack { get; set; }
 
             public FangsAttack(IDiceManager rng)
             {
@@ -27,22 +29,11 @@ namespace PathfinderCombatSimulator.StaticDefinitions.Mobs
                     }
                 };
 
-                _damageEffects.Add(new DamageEffect { DamageDice = theDamageDice, DamageType = DamageType.Physical });
+                DamageEffects.Add(new DamageEffect { DamageDice = theDamageDice, DamageType = DamageType.Physical });
 
             }
 
-            private readonly IList<DamageEffect> _damageEffects = new List<DamageEffect>();
-
-            public Dictionary<DamageType, int> RollDamage()
-            {
-                var _damageEffect = _damageEffects.First();
-
-                var returnable = new Dictionary<DamageType, int>();
-                returnable[_damageEffect.DamageType] = _rng.AddRolls(_damageEffect.DamageDice);
-                return returnable;
-            }
-
-
+            public IList<DamageEffect> DamageEffects { get; set; } = new List<DamageEffect>();
 
             public int RollToHit(int numberOfPreviousAttacksThisTurn) =>
                 _rng.Roll(20) + 9;

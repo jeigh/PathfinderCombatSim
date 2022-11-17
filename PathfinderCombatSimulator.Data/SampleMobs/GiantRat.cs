@@ -18,6 +18,7 @@ namespace PathfinderCombatSimulator.StaticDefinitions.Mobs
         {
             private readonly IDiceManager _rng;
 
+
             public GiantRatBiteAttack(IDiceManager rng)
             {
                 _rng = rng;
@@ -32,20 +33,12 @@ namespace PathfinderCombatSimulator.StaticDefinitions.Mobs
                     }
                 };
 
-                _damageEffects.Add(new DamageEffect { DamageDice = theDamageDice, DamageType = DamageType.Physical });
-
+                DamageEffects.Add(new DamageEffect { DamageDice = theDamageDice, DamageType = DamageType.Physical });
             }
 
-            private readonly IList<DamageEffect> _damageEffects = new List<DamageEffect>();
+            public IList<DamageEffect> DamageEffects { get; set; } = new List<DamageEffect>();
 
-            public Dictionary<DamageType, int> RollDamage()
-            {
-                var _damageEffect = _damageEffects.First();
 
-                var returnable = new Dictionary<DamageType, int>();
-                returnable[_damageEffect.DamageType] = _rng.AddRolls(_damageEffect.DamageDice);
-                return returnable;
-            }
 
 
             public int RollToHit(int numberOfPreviousAttacksThisTurn) =>
