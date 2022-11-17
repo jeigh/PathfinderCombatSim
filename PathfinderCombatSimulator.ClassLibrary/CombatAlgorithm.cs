@@ -49,14 +49,14 @@ namespace PathfinderCombatSimulator
 
         private bool HasAvailableActionThisTurn(Mob mob) => true;
 
-        private void ProcessAction(int actionNumber, Mob mob, List<CombatTeam> combatGroups, Dictionary<Mob, int> previousAttackCountForMobThisTurn)
+        private void ProcessAction(int actionNumber, Mob mob, List<CombatTeam> combatGroups, Dictionary<Mob, int> dictionaryOfPreviousAttackCounts)
         {
             Mob? targetMob = _ai.GetTargetFor(mob, combatGroups);
 
             if (targetMob == null || _combat.IsDead(mob) || _combat.IsUnconcious(mob)) return;
 
             int prevAttacks = 0;
-            var abc = previousAttackCountForMobThisTurn.TryGetValue(mob, out prevAttacks);
+            var abc = dictionaryOfPreviousAttackCounts.TryGetValue(mob, out prevAttacks);
 
             AttackResults? results = Attack(mob, targetMob, prevAttacks);
 
