@@ -15,5 +15,5 @@ As of yet, there are MANY unimplemented features; the most obvious ones being
 * A portal for players and DMs to upload their characters.
 * The concept of a session, where DMs can create a session, players can connect to it, and whatever live visualizations I can think of.
 * DM and player authentication via social network identies.
-* Advanced AI (possibly include some form of actual AI training at this point)
+* Advanced AI 
 
