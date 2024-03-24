@@ -2,6 +2,7 @@ I created this with the ambitous goal of creating a combat simulator for Pathfin
 
 As of yet, there are MANY unimplemented features; the most obvious ones being 
 
+* User Input.   Right now, if you want to simulate combat, you arrange the combat teams in program.cs and hit the F5 button.   Ideally, these sequences should be managable from within some form of UI instead of being hard-coded.
 * Persistence.  At some point in the near future, I want the NPC information to be stored in a database instead of just loading the characters from the Static Definitions library.
 * Movement (And any form of a battlefield)
 * Attacks of opportunity
