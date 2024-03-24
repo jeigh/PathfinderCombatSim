@@ -6,6 +6,8 @@ As of yet, there are MANY unimplemented features; the most obvious ones being
 * Movement (And any form of a battlefield)
 * Attacks of opportunity
 * Special abilities and attacks like trip, disarm, etc...
+* Simple reports showing the outcome of these simulations in aggregate.
+* Combat visualizations, Replays, etc, allowing for someone to step through the sequence of an individual replay
 * Simple AI for more intelligent NPCs to use those special abilities, avoid AoOs, and position themselves to avoid sneak attacks.
 * Any magic spells or similar effects.
 * Magic Weapons (above and beyond what can be simulated through just increasing the attack modifiers of the mob's primary weapon)
