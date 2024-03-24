@@ -12,7 +12,8 @@ As of yet, there are MANY unimplemented features; the most obvious ones being
 * Any magic spells or similar effects.
 * Magic Weapons (above and beyond what can be simulated through just increasing the attack modifiers of the mob's primary weapon)
 * Any form of character or NPC progression.   At the moment, if you want your characters to advance, you simply make a new static definition with updated stats.
-* A portal for players and NPCs to upload their characters.
+* A portal for players and DMs to upload their characters.
+* The concept of a session, where DMs can create a session, players can connect to it, and whatever live visualizations I can think of.
 * DM and player authentication via social network identies.
-* Advanced AI
+* Advanced AI (possibly include some form of actual AI training at this point)
 
