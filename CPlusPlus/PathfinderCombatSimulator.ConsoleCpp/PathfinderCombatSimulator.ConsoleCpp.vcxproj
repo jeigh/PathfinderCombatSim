@@ -128,14 +128,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="DiceManager.cpp" />
+    <ClCompile Include="dice_manager.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="TestDiceRolling.cpp" />
-    <ClCompile Include="TestDiceRolling.h" />
+    <ClCompile Include="test_dice_rolling.cpp" />
+    <ClCompile Include="test_dice_rolling.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DiceManager.h" />
-    <ClInclude Include="DieRoll.h" />
+    <ClInclude Include="types.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

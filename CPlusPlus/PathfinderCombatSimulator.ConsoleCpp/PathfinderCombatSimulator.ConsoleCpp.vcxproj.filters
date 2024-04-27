@@ -18,21 +18,18 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TestDiceRolling.h">
+    <ClCompile Include="test_dice_rolling.h">
       <Filter>Header Files</Filter>
     </ClCompile>
-    <ClCompile Include="TestDiceRolling.cpp">
+    <ClCompile Include="test_dice_rolling.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DiceManager.cpp">
+    <ClCompile Include="dice_manager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DiceManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DieRoll.h">
+    <ClInclude Include="types.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

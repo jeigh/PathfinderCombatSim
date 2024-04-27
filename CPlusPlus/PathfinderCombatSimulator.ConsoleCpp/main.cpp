@@ -1,5 +1,5 @@
 #include <iostream>
-#include "TestDiceRolling.h"
+#include "test_dice_rolling.h"
 
 using std::cout;
 using std::cin;
@@ -14,10 +14,10 @@ int main()
     cin >> a;
     int seed = 42;
     srand(seed);
-    auto item = new PathfinderCombatSimulator::TestDiceRolling();
+    auto item = new pathfinder_combat_simulator::test_dice_rolling();
     while (true)
     {
-        item->RunTest();
+        item->run_test();
 	}
 
 
