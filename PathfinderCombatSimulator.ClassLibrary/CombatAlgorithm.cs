@@ -158,7 +158,6 @@ namespace PathfinderCombatSimulator
             return false;
         }
 
-
         public int RollInitiative(Mob actor) =>
             actor.PerceptionSkillCheckModifier + _rng.Roll(20);
     }

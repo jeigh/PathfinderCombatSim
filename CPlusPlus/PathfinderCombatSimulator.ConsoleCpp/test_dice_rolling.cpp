@@ -1,4 +1,5 @@
 #include "test_dice_rolling.h"
+#include <iostream>
 
 using std::cout;
 using std::unique_ptr;

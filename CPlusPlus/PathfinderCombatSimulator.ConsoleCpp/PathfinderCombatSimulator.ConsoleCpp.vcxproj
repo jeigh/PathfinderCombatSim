@@ -128,10 +128,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="combat_algorithm.cpp" />
     <ClCompile Include="dice_manager.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="combat_helper.cpp" />
     <ClCompile Include="test_dice_rolling.cpp" />
     <ClCompile Include="test_dice_rolling.h" />
+    <ClCompile Include="user_interface.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="types.h" />
