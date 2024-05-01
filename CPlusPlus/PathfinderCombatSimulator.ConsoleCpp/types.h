@@ -28,7 +28,7 @@ namespace pathfinder_combat_simulator
 	class dice_manager
 	{
 	public:
-		[[nodiscard]] int add_rolls(const vector<die_roll> dice) const;
+		[[nodiscard]] int add_rolls(const vector<die_roll>& dice) const;
 		[[nodiscard]] int roll(const int die_size) const;
 	};
 
@@ -61,7 +61,7 @@ namespace pathfinder_combat_simulator
 			max_hit_points(max_hit_points),
 			current_armor_class(current_armor_class),
 			perception_skill_check_modifier(perception_skill_check_modifier),
-			default_attack(std::move(default_attack)) { }
+			default_attack(default_attack) { }
 
 		string id;
 		int current_hit_points = 0;
@@ -143,6 +143,12 @@ namespace pathfinder_combat_simulator
 		void process_action(int action_number, mobile_object mob, vector <combat_team> combatGroups, unordered_map<mobile_object, int> dictionary_of_previous_attack_counts) const;
 		[[nodiscard]] auto has_available_action_this_turn(mobile_object mob) const -> bool;
 
+	};
+
+	class testClassBase
+	{
+	public:
+		virtual void run_test() const = 0;
 	};
 
 

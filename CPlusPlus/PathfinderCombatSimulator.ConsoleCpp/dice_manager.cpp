@@ -4,7 +4,7 @@
 namespace pathfinder_combat_simulator
 {
 
-	[[nodiscard]] int dice_manager::add_rolls(const vector<die_roll> dice) const
+	[[nodiscard]] int dice_manager::add_rolls(const vector<die_roll>& dice) const
 	{
         int returnable = 0;
 

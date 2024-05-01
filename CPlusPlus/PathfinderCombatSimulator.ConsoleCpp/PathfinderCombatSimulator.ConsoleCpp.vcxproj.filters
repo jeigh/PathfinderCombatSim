@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\TestClasses">
+      <UniqueIdentifier>{d80f346f-8e49-46d3-9f27-6524cbe0b930}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -20,9 +23,6 @@
     </ClCompile>
     <ClCompile Include="test_dice_rolling.h">
       <Filter>Header Files</Filter>
-    </ClCompile>
-    <ClCompile Include="test_dice_rolling.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="dice_manager.cpp">
       <Filter>Source Files</Filter>
@@ -36,9 +36,18 @@
     <ClCompile Include="combat_helper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="test_dice_rolling.cpp">
+      <Filter>Source Files\TestClasses</Filter>
+    </ClCompile>
+    <ClCompile Include="combat_helper_tests.cpp">
+      <Filter>Source Files\TestClasses</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="types.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="combat_helper_tests.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,5 +1,8 @@
 #include <iostream>
+
+
 #include "test_dice_rolling.h"
+#include "combat_helper_tests.h"
 
 using std::cout;
 using std::cin;
@@ -7,34 +10,35 @@ using std::make_unique;
 using std::string;
 
 
-void do_work(const dice_manager& roller)
-{
-	auto null_attack = make_unique<pathfinder_combat_simulator::attack>();
-	auto mob = make_unique<pathfinder_combat_simulator::mobile_object>("a randomized mob", roller.roll(100) - 20, roller.roll(100) , 10, 4, *null_attack);
+using namespace pathfinder_combat_simulator;
 
-	auto unit = make_unique<pathfinder_combat_simulator::combat_helper>();
-
-	string status = unit->is_dead(*mob) ? " is dead" : " still lives";
-	status += unit->is_unconcious(*mob) ? ", but is unconcious!\n" : "!\n";
-
-	cout << "At " << mob->current_hit_points << " hit points, " << mob->id << status;
-}
 
 int main() 
 {
-    cout << "Press any key to begin stress test" << '\n';
-    char a = 'a';
-    cin >> a;
     int seed = 42;
     srand(seed);
-    const auto roller = make_unique<dice_manager>();
+    cout << "Hit a key to begin...\n";
 
-    while (true)
+    if (!getchar()) return 0;
+
+	auto diceManager = make_unique<dice_manager>();
+    auto combatHelperTests = make_shared<combat_helper_tests>(*diceManager);
+    auto diceRollingTests = make_shared<test_dice_rolling>(*diceManager);
+
+    auto tests = vector<shared_ptr<testClassBase>>();
+
+    tests.push_back(combatHelperTests);
+    tests.push_back(diceRollingTests);
+
+    for (int i = 0; i < 100000; ++i)
     {
-        do_work(*roller);
-	}
-
-
+	    for (const shared_ptr<testClassBase>& test : tests)
+	    {
+            test->run_test();
+	    }
+    	
+    }
+    cout << "yeah\n";
 
 }
 
