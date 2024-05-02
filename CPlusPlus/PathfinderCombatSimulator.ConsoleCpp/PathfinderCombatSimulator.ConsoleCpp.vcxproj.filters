@@ -21,7 +21,7 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="test_dice_rolling.h">
+    <ClCompile Include="dice_rolling_tests.h">
       <Filter>Header Files</Filter>
     </ClCompile>
     <ClCompile Include="dice_manager.cpp">
@@ -36,7 +36,7 @@
     <ClCompile Include="combat_helper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="test_dice_rolling.cpp">
+    <ClCompile Include="dice_rolling_tests.cpp">
       <Filter>Source Files\TestClasses</Filter>
     </ClCompile>
     <ClCompile Include="combat_helper_tests.cpp">

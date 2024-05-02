@@ -2,13 +2,13 @@
 
 namespace pathfinder_combat_simulator
 {
-	[[nodiscard]] auto combat_helper::is_dead(const mobile_object& mob) const -> bool
+	[[nodiscard]] auto combat_helper::is_dead(shared_ptr<mobile_object> mob) const -> bool
 	{
-		return mob.current_hit_points <= -10;
+		return mob->current_hit_points <= -10;
 	}
 
-	[[nodiscard]] auto combat_helper::is_unconcious(const mobile_object& mob) const-> bool
+	[[nodiscard]] auto combat_helper::is_unconcious(shared_ptr<mobile_object> mob) const-> bool
 	{
-		return (mob.current_hit_points > -10 && mob.current_hit_points <= 0);
+		return (mob->current_hit_points > -10 && mob->current_hit_points <= 0);
 	}
 }

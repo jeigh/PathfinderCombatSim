@@ -1,11 +1,10 @@
 #include <iostream>
 
 
-#include "test_dice_rolling.h"
+#include "dice_rolling_tests.h"
 #include "combat_helper_tests.h"
 
 using std::cout;
-using std::cin;
 using std::make_unique;
 using std::string;
 
@@ -23,7 +22,7 @@ int main()
 
 	auto diceManager = make_unique<dice_manager>();
     auto combatHelperTests = make_shared<combat_helper_tests>(*diceManager);
-    auto diceRollingTests = make_shared<test_dice_rolling>(*diceManager);
+    auto diceRollingTests = make_shared<dice_rolling_tests>(*diceManager);
 
     auto tests = vector<shared_ptr<testClassBase>>();
 
@@ -32,11 +31,10 @@ int main()
 
     for (int i = 0; i < 100000; ++i)
     {
-	    for (const shared_ptr<testClassBase>& test : tests)
+	    for (auto test : tests)
 	    {
             test->run_test();
-	    }
-    	
+	    }    	
     }
     cout << "yeah\n";
 

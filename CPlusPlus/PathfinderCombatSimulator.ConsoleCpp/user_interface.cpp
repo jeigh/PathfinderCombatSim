@@ -23,7 +23,7 @@ namespace pathfinder_combat_simulator
 	{
 		
 	}
-	void user_interface::receive_damage(attack_results results) const
+	void user_interface::receive_damage(shared_ptr<attack_results> results) const
 	{
 		
 	}
@@ -44,7 +44,7 @@ namespace pathfinder_combat_simulator
 		}
 	}
 
-	void user_interface::attack_misses(mobile_object mob, mobile_object target_mob) const
+	void user_interface::attack_misses(shared_ptr<mobile_object> mob, shared_ptr<mobile_object> target_mob) const
 	{
 		
 	}

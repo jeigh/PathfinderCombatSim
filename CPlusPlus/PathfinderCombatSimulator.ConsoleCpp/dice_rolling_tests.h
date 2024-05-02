@@ -17,10 +17,10 @@ using std::cout;
 
 namespace pathfinder_combat_simulator
 {
-	class test_dice_rolling : public testClassBase
+	class dice_rolling_tests : public testClassBase
 	{
 	public:
-		explicit test_dice_rolling(const dice_manager& dice_manager) :
+		explicit dice_rolling_tests(const dice_manager& dice_manager) :
 			_dice_manager(dice_manager) {}
 		
 		void run_test() const override;

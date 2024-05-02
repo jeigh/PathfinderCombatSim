@@ -1,11 +1,11 @@
-#include "test_dice_rolling.h"
+#include "dice_rolling_tests.h"
 #include <iostream>
 
 using std::cout;
 
 namespace pathfinder_combat_simulator
 {
-    void test_dice_rolling::run_test() const 
+    void dice_rolling_tests::run_test() const 
     {
         auto die1 = make_die_roll(die_count_, die_size_);
         auto die2 = make_die_roll(die_count_, die_size_);
