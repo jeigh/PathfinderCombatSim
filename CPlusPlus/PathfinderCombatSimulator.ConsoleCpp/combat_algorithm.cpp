@@ -7,20 +7,26 @@ using std::make_shared;
 using std::shared_ptr;
 using std::tuple;
 using std::logic_error;
-
+#define nullable_mob shared_ptr<mobile_object>
 
 namespace pathfinder_combat_simulator 
 {
-
-#define nullable_mob shared_ptr<mobile_object>
-
 	class combat_algorithm  
 	{
 	public:
-		combat_algorithm(const dice_manager& rng, const user_interface& ui, const combat_helper& combat, const mob_ai& ai)
-			: _rng(rng), _ui(ui), _combat(combat), _ai(ai) {}
+		combat_algorithm(
+			shared_ptr<dice_manager> rng, 
+			shared_ptr<user_interface> ui,
+			shared_ptr<combat_helper> combat,
+			shared_ptr<mob_ai> ai)
+			:
+			_rng(rng),
+			_ui(ui),
+			_combat(combat),
+			_ai(ai) {}
 
-		[[nodiscard]] auto roll_and_order_by_initiative(vector<shared_ptr<combat_team>> groups) const->vector<shared_ptr<tuple<nullable_mob, int>>>
+		[[nodiscard]] auto roll_and_order_by_initiative(
+			vector<shared_ptr<combat_team>> const groups) const->vector<shared_ptr<tuple<nullable_mob, int>>>
 		{
 			auto initiative_table = vector<shared_ptr<tuple<nullable_mob, int>>>();
 
@@ -36,12 +42,14 @@ namespace pathfinder_combat_simulator
 			return initiative_table;
 		}
 
-		[[nodiscard]] auto roll_initiative(shared_ptr<mobile_object> actor) const -> int
+		[[nodiscard]] auto roll_initiative(
+			shared_ptr<mobile_object> const actor) const -> int
 		{
-			return actor->perception_skill_check_modifier + _rng.roll(20);
+			return actor->perception_skill_check_modifier + _rng->roll(20);
 		}
 
-		[[nodiscard]] auto is_combat_still_active(const vector<shared_ptr<combat_team>>& combat_groups) const -> bool
+		[[nodiscard]] auto is_combat_still_active(
+			vector<shared_ptr<combat_team>> const combat_groups) const -> bool
 		{
 			for (auto combat_group : combat_groups)
 			{
@@ -50,13 +58,14 @@ namespace pathfinder_combat_simulator
 			return false;
 		}
 
-		[[nodiscard]] auto roll_damage(vector<damage_effect> damage_effects) const->unique_ptr<unordered_map<damage_type, int>>
+		[[nodiscard]] auto roll_damage(
+			vector<damage_effect> const damage_effects) const->unique_ptr<unordered_map<damage_type, int>>
 		{
 			auto returnable = make_unique<unordered_map<damage_type, int>>();
 
 			for (damage_effect damage_effect : damage_effects)
 			{
-				int amount_to_add = _rng.add_rolls(damage_effect.damage_dice);
+				int amount_to_add = _rng->add_rolls(damage_effect.damage_dice);
 				damage_type key = damage_effect.damage_type;
 
 				if (returnable->contains(damage_effect.damage_type))
@@ -68,19 +77,22 @@ namespace pathfinder_combat_simulator
 			return returnable;
 		}
 
-		[[nodiscard]] auto roll_to_hit(int number_of_previous_attacks_this_turn, int attack_modifier) const -> int
+		[[nodiscard]] auto roll_to_hit(
+			int const number_of_previous_attacks_this_turn, 
+			int const attack_modifier) const -> int
 		{
-			return _rng.roll(20) + attack_modifier - (number_of_previous_attacks_this_turn * 5);
+			return _rng->roll(20) + attack_modifier - (number_of_previous_attacks_this_turn * 5);
 		}
 
-		[[nodiscard]] auto process_battle_until_only_one_team_is_concious(vector<shared_ptr<combat_team>> combat_groups) const->vector<shared_ptr<combat_team>>
+		[[nodiscard]] auto process_battle_until_only_one_team_is_concious(
+			vector<shared_ptr<combat_team>> const combat_groups) const->vector<shared_ptr<combat_team>>
 		{
 			if (combat_groups.size() > 2) throw logic_error("Only two or fewer combat groups are supported.");
 			auto sorted_initiative = roll_and_order_by_initiative(combat_groups);
 			int roundId = 1;
 			while(is_combat_still_active(combat_groups))
 			{
-				_ui.round_starts(roundId);
+				_ui->round_starts(roundId);
 				auto previous_attack_count_for_mob_this_round = vector<tuple<shared_ptr<mobile_object>, int>>();
 				for (const shared_ptr<tuple<shared_ptr<mobile_object>, int>>& kvp : sorted_initiative)
 				{
@@ -94,9 +106,8 @@ namespace pathfinder_combat_simulator
 					if (has_available_action_this_turn(mob)) process_action(1, mob, combat_groups, mapified);
 					if (has_available_action_this_turn(mob)) process_action(2, mob, combat_groups, mapified);
 					if (has_available_action_this_turn(mob)) process_action(3, mob, combat_groups, mapified);
-
 				}
-				_ui.round_ends(roundId);
+				_ui->round_ends(roundId);
 				roundId++;
 			}
 			return combat_groups;
@@ -104,21 +115,25 @@ namespace pathfinder_combat_simulator
 
 
 	private:
-		dice_manager _rng;
-		user_interface _ui;
-		combat_helper _combat;
-		mob_ai _ai;
+		shared_ptr<dice_manager> _rng;
+		shared_ptr<user_interface> _ui;
+		shared_ptr<combat_helper> _combat;
+		shared_ptr<mob_ai> _ai;
 
-		[[nodiscard]] auto still_lives(const shared_ptr<combat_team> acg) const -> bool
+		[[nodiscard]] auto still_lives(
+			shared_ptr<combat_team> const acg) const -> bool
 		{
 			for (auto mob : acg->combatants)
 			{
-				if (!_combat.is_dead(mob)) return true;
+				if (!_combat->is_dead(mob)) return true;
 			}
 			return false;
 		}
 
-		[[nodiscard]] auto attack(shared_ptr<mobile_object> attacker, shared_ptr<mobile_object> victim, int number_of_previous_attacks_made_this_turn) const->shared_ptr<attack_results>
+		[[nodiscard]] auto attack(
+			shared_ptr<mobile_object> const attacker, 
+			shared_ptr<mobile_object> const victim, 
+			int const number_of_previous_attacks_made_this_turn) const->shared_ptr<attack_results>
 		{
 			if (attacker->default_attack != nullptr)
 			{
@@ -149,26 +164,31 @@ namespace pathfinder_combat_simulator
 			return nullptr;
 		}
 
-		void process_action(int action_number, nullable_mob acting_mob, vector <shared_ptr<combat_team>> combat_groups, unordered_map<shared_ptr<mobile_object>, int> dictionary_of_previous_attack_counts) const
+		void process_action(
+			int const action_number, 
+			nullable_mob const acting_mob, 
+			vector <shared_ptr<combat_team>> const combat_groups, 
+			unordered_map<shared_ptr<mobile_object>, int> const dictionary_of_previous_attack_counts) const
 		{
-			auto target_mob = _ai.get_target_for(acting_mob, combat_groups);
-			if (target_mob == nullptr || _combat.is_dead(acting_mob) || _combat.is_unconcious(acting_mob))
+			auto target_mob = _ai->get_target_for(acting_mob, combat_groups);
+			if (target_mob == nullptr || _combat->is_dead(acting_mob) || _combat->is_unconcious(acting_mob))
 			{
 				auto victim = target_mob;
 				auto prev_attacks = dictionary_of_previous_attack_counts.at(acting_mob);
 				auto results = attack(acting_mob, victim, prev_attacks);
 				if (results != nullptr && !(results->target_mob == nullptr))
-					_ui.attack_misses(acting_mob, victim);
+					_ui->attack_misses(acting_mob, victim);
 				else
 				{
 					if (results->damage_delivered <= 0) return;
 					results->target_mob->current_hit_points -= results->damage_delivered;
-					_ui.receive_damage(results);
+					_ui->receive_damage(results);
 				}
 			}
 		}
 
-		[[nodiscard]] auto has_available_action_this_turn(shared_ptr<mobile_object> mob) const -> bool
+		[[nodiscard]] auto has_available_action_this_turn(
+			shared_ptr<mobile_object> const mob) const -> bool
 		{
 			return true;
 		}
