@@ -50,5 +50,8 @@
     <ClInclude Include="combat_helper_tests.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="combat_algorithm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

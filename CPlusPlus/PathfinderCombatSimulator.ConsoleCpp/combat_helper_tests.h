@@ -12,10 +12,10 @@ namespace pathfinder_combat_simulator
 	class combat_helper_tests : public testClassBase
 	{
 	private:
-	    dice_manager _roller;
+	    shared_ptr<dice_manager> _roller;
 
 	public:
-		explicit combat_helper_tests(const dice_manager& roller) : _roller(roller) {}
+		explicit combat_helper_tests(shared_ptr<dice_manager> roller) : _roller(roller) {}
 		void run_test() const override;
 	};
 }

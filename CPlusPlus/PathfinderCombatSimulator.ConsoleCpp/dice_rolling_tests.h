@@ -20,7 +20,7 @@ namespace pathfinder_combat_simulator
 	class dice_rolling_tests : public testClassBase
 	{
 	public:
-		explicit dice_rolling_tests(const dice_manager& dice_manager) :
+		explicit dice_rolling_tests(shared_ptr<dice_manager> dice_manager) :
 			_dice_manager(dice_manager) {}
 		
 		void run_test() const override;
@@ -29,7 +29,7 @@ namespace pathfinder_combat_simulator
 	private:
 	    int die_size_ = 3;
 	    int die_count_ = 6;
-		dice_manager _dice_manager;
+		shared_ptr<dice_manager> _dice_manager;
 
 		[[nodiscard]] shared_ptr<die_roll> make_die_roll(int count, int size) const
 		{

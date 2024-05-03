@@ -138,6 +138,7 @@
     <ClCompile Include="user_interface.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="combat_algorithm.h" />
     <ClInclude Include="combat_helper_tests.h" />
     <ClInclude Include="types.h" />
   </ItemGroup>

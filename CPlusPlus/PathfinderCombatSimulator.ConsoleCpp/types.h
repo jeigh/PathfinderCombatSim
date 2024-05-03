@@ -5,7 +5,8 @@
 #include <vector>
 #include <string>
 #include <memory>
-#include <tuple>
+#include <iostream>
+
 
 using std::vector;
 using std::unordered_map;
@@ -34,23 +35,23 @@ namespace pathfinder_combat_simulator
 	class dice_manager
 	{
 	public:
-		[[nodiscard]] int add_rolls(const vector<die_roll>& dice) const;
+		[[nodiscard]] int add_rolls(const vector<shared_ptr<die_roll>> dice) const;
 		[[nodiscard]] int roll(const int die_size) const;
 	};
 
 	enum damage_type
 	{
 		none,
-		physical,
-		poison
+		physical = 1,
+		poison = 2
 	};
 
 	class damage_effect
 	{
 	public:
-		int damage_amount;
-		damage_type damage_type;
-		vector<die_roll> damage_dice;
+		int damage_amount = 0;
+		damage_type damage_type = physical;
+		vector<shared_ptr<die_roll>> damage_dice;
 	};
 
 	class attack
@@ -106,18 +107,52 @@ namespace pathfinder_combat_simulator
 		shared_ptr<mobile_object> attacking_mob;
 	};
 
+	using std::cout;
+	using std::pair;
+	using std::endl;
+
 	class user_interface
 	{
 	public:
-		void die(mobile_object target_mob) const;
-		void flush() const;
-		void knock_out(mobile_object target_mob) const;
-		void process_attack(mobile_object mob, int damage_roll, mobile_object victim) const;
-		void receive_damage(shared_ptr<attack_results> results) const;
-		void round_ends(int turn_id) const;
-		void round_starts(int turn_id) const;
-		void output_aggregates(unordered_map<string, int> const& winners) const;
-		void attack_misses(shared_ptr<mobile_object> mob, shared_ptr<mobile_object> target_mob) const;
+		void die(shared_ptr<mobile_object> target_mob) const
+		{
+			cout << target_mob->id << " has died!" << endl;
+		}
+
+		void knock_out(shared_ptr<mobile_object> target_mob) const
+		{
+			cout << target_mob->id << " just got knocked out!" << endl;
+		}
+		void process_attack(shared_ptr<mobile_object> mob, int damage_roll, shared_ptr<mobile_object> victim) const
+		{
+			// currently uncalled
+			cout << "Process attack..." << endl;
+		}
+		void receive_damage(shared_ptr<attack_results> results) const
+		{
+			if (results->attacking_mob == nullptr && results->target_mob == nullptr) return;
+			cout << results->attacking_mob->id << " has delivered " << results->damage_delivered << " damage to " << results->target_mob->id << endl;
+		}
+		void round_ends(int turn_id) const
+		{
+			cout << "Round " << turn_id << " ends." << endl;
+		}
+		void round_starts(int turn_id) const
+		{
+			cout << "Round " << turn_id << " starts." << endl;
+		}
+		void output_aggregates(unordered_map<string, int> const& winners) const
+		{
+			// currently uncalled
+			for (const pair<string, int> winner : winners)
+			{
+				cout << winner.first << " Wins : " << winner.second << endl;
+			}
+		}
+		void attack_misses(shared_ptr<mobile_object> mob, shared_ptr<mobile_object> target_mob) const
+		{
+			cout << mob->id << " attempted to hit " << target_mob->id << "  but missed." << endl;
+		}
 	};
 
 	class mob_and_initiative
@@ -157,10 +192,10 @@ namespace pathfinder_combat_simulator
 	class mob_ai
 	{
 	public:
-		explicit mob_ai(const combat_helper& combat) : _combat(combat) { }
+		explicit mob_ai(shared_ptr<combat_helper> combat) : _combat(combat) { }
 
 	private:
-		combat_helper _combat;
+		shared_ptr<combat_helper> _combat;
 
 	public:
 		[[nodiscard]] shared_ptr<mobile_object> get_target_for(shared_ptr<mobile_object> item, const vector<shared_ptr<combat_team>>& acgs) const
@@ -170,7 +205,7 @@ namespace pathfinder_combat_simulator
 				if (team->contains(item)) continue;
 				for (auto combatant : team->combatants)
 				{
-					if (!_combat.is_dead(combatant)) 
+					if (!_combat->is_dead(combatant)) 
 						return combatant;
 				}
 			}
