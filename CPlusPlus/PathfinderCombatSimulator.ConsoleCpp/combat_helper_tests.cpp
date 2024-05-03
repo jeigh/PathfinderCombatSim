@@ -21,6 +21,4 @@ namespace pathfinder_combat_simulator
 
 		cout << "At " << mob->current_hit_points << " hit points, " << mob->id << status;
 	}
-
-
 }

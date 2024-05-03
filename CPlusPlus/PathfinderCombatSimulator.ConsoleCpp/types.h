@@ -11,8 +11,6 @@ using std::vector;
 using std::unordered_map;
 using std::string;
 using std::shared_ptr;
-using std::optional;
-using std::nullopt;
 using std::unique_ptr;
 using std::tuple;
 
@@ -72,7 +70,8 @@ namespace pathfinder_combat_simulator
 			const int current_armor_class,
 			const int perception_skill_check_modifier,
 			shared_ptr<attack> default_attack)
-			: id(std::move(id)),
+			:
+			id(std::move(id)),
 			current_hit_points(current_hit_points),
 			max_hit_points(max_hit_points),
 			current_armor_class(current_armor_class),
@@ -96,9 +95,6 @@ namespace pathfinder_combat_simulator
 			return this->id == shared->id;
 		}
 	};
-
-
-
 
 	class attack_results
 	{
@@ -136,7 +132,8 @@ namespace pathfinder_combat_simulator
 	public:
 		string name;
 		vector<shared_ptr<mobile_object>> combatants;
-		bool contains(shared_ptr<mobile_object> contained) const
+
+		[[nodiscard]] bool contains(shared_ptr<mobile_object> contained) const
 		{
 			for (auto mob : combatants)
 			{
@@ -152,7 +149,11 @@ namespace pathfinder_combat_simulator
 		[[nodiscard]] bool is_unconcious(shared_ptr<mobile_object> mob) const;
 	};
 
-	class battle_results {};
+	class battle_results
+	{
+	public:
+		vector<combat_team> groups;
+	};
 	class mob_ai
 	{
 	public:
@@ -162,12 +163,12 @@ namespace pathfinder_combat_simulator
 		combat_helper _combat;
 
 	public:
-		[[nodiscard]] shared_ptr<mobile_object> get_target_for(shared_ptr<mobile_object> item, const vector<combat_team>& acgs) const
+		[[nodiscard]] shared_ptr<mobile_object> get_target_for(shared_ptr<mobile_object> item, const vector<shared_ptr<combat_team>>& acgs) const
 		{
-			for (const combat_team& team : acgs)
+			for (const shared_ptr<combat_team>& team : acgs)
 			{
-				if (team.contains(item)) continue;
-				for (auto combatant : team.combatants)
+				if (team->contains(item)) continue;
+				for (auto combatant : team->combatants)
 				{
 					if (!_combat.is_dead(combatant)) 
 						return combatant;
@@ -177,17 +178,7 @@ namespace pathfinder_combat_simulator
 		}
 	};
 
-	class virtual_combat_algorithm
-	{
-	public:
-		
-		[[nodiscard]] virtual auto roll_and_order_by_initiative(vector<combat_team> groups) const->vector<shared_ptr<tuple<shared_ptr<mobile_object>, int>>> = 0;
-		[[nodiscard]] virtual auto roll_initiative(mobile_object actor) const -> int = 0;
-		[[nodiscard]] virtual auto is_combat_still_active(const vector<combat_team>& combat_groups) const -> bool = 0;
-		[[nodiscard]] virtual auto roll_damage(vector<damage_effect> damage_effects) const->unique_ptr<unordered_map<damage_type, int>> = 0;
-		[[nodiscard]] virtual auto roll_to_hit(int number_of_previous_attacks_this_turn, int attack_modifier) const -> int = 0;
-		[[nodiscard]] virtual auto process_battle_until_only_one_team_is_concious(vector<combat_team> combat_groups) const->battle_results = 0;
-	};
+
 
 
 
