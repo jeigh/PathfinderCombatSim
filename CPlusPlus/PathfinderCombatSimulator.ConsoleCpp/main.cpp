@@ -2,12 +2,10 @@
 
 
 #include "dice_rolling_tests.h"
-#include "combat_helper_tests.h"
 #include "combat_algorithm.h"
 #include "types.h"
 
 using std::cout;
-using std::make_unique;
 using std::string;
 
 using namespace pathfinder_combat_simulator;
@@ -27,7 +25,7 @@ public:
 		auto theDamageEffect = make_shared<damage_effect>();
         vector vector_of_damage_dice = { theDamageDice };
         theDamageEffect->damage_dice = vector_of_damage_dice;
-        theDamageEffect->damage_type = physical;
+        theDamageEffect->_damage_type = physical;
         damage_effects_.push_back(*theDamageEffect);
 	}
 };
@@ -44,9 +42,8 @@ private:
 public:
 	void run_test() const override
 	{
-        auto orcWarrior = make_shared<mobile_object>("orcWarrior", 23, 23, 18, 0, make_shared<OrcNeckSplitterAttack>());
-        auto orcBrute = make_shared<mobile_object>("orcBrute", 23, 23, 18, 0, make_shared<OrcNeckSplitterAttack>());
-
+        auto orcWarrior = make_shared<mobile_object>("orcWarrior",  23, 18, 0, make_shared<OrcNeckSplitterAttack>());
+        auto orcBrute = make_shared<mobile_object>("orcBrute",  23, 18, 0, make_shared<OrcNeckSplitterAttack>());
         
         vector<shared_ptr<combat_team>> combatGroups; 
         
@@ -65,32 +62,26 @@ public:
 
 int main() 
 {
-    int seed = 42;
-    srand(seed);
+    auto seed = time(nullptr);
+    srand(static_cast<unsigned int> (seed));
     cout << "Hit a key to begin...\n";
 
     if (!getchar()) return 0;
 
     auto diceManager = make_shared<dice_manager>();
     auto userInterface = make_shared<user_interface>();
-    auto combatHelper = make_shared<combat_helper>();
-    auto mobAi = make_shared <mob_ai>(combatHelper);
-    auto combatAlgorithm = make_shared<combat_algorithm>(diceManager, userInterface, combatHelper, mobAi);
 
-	auto combatHelperTests = make_shared<combat_helper_tests>(diceManager);
-    auto diceRollingTests = make_shared<dice_rolling_tests>(diceManager);
-    auto combatAlgorithmTests = make_shared<combat_algorithm_tests>(combatAlgorithm);
+    auto mobAi = make_shared <mob_ai>();
+    auto combatAlgorithm = make_shared<combat_algorithm>(diceManager, userInterface, mobAi);
 
-
+	auto combatAlgorithmTests = make_shared<combat_algorithm_tests>(combatAlgorithm);
 	auto tests = vector<shared_ptr<testClassBase>>();
-
-    tests.push_back(combatHelperTests);
-    tests.push_back(diceRollingTests);
+    
     tests.push_back(combatAlgorithmTests);
 
-    for (int i = 0; i < 10; ++i)
+    for (int i = 0; i < 10000; ++i)
     {
-	    for (auto test : tests)
+	    for (shared_ptr<testClassBase> test : tests)
 	    {
             test->run_test();
 	    }    	

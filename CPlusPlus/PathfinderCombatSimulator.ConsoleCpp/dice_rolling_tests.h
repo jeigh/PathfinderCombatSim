@@ -6,10 +6,8 @@
 
 
 
-using std::unique_ptr;
 using pathfinder_combat_simulator::dice_manager;
 using pathfinder_combat_simulator::die_roll;
-using std::make_unique;
 using std::make_shared;
 using std::shared_ptr;
 using std::cout;
@@ -33,7 +31,7 @@ namespace pathfinder_combat_simulator
 
 		[[nodiscard]] shared_ptr<die_roll> make_die_roll(int count, int size) const
 		{
-			return make_unique<die_roll>(count, size);
+			return make_shared<die_roll>(count, size);
 		}
 	};
 }

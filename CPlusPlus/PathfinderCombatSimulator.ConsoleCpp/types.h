@@ -1,6 +1,5 @@
 #pragma once
 
-#include <optional>
 #include <unordered_map>
 #include <vector>
 #include <string>
@@ -11,9 +10,10 @@
 using std::vector;
 using std::unordered_map;
 using std::string;
-using std::shared_ptr;
 using std::unique_ptr;
 using std::tuple;
+
+#define nullable std::shared_ptr
 
 namespace pathfinder_combat_simulator 
 {
@@ -35,7 +35,7 @@ namespace pathfinder_combat_simulator
 	class dice_manager
 	{
 	public:
-		[[nodiscard]] int add_rolls(const vector<shared_ptr<die_roll>> dice) const;
+		[[nodiscard]] int add_rolls(const vector<nullable<die_roll>> dice) const;
 		[[nodiscard]] int roll(const int die_size) const;
 	};
 
@@ -50,8 +50,8 @@ namespace pathfinder_combat_simulator
 	{
 	public:
 		int damage_amount = 0;
-		damage_type damage_type = physical;
-		vector<shared_ptr<die_roll>> damage_dice;
+		damage_type _damage_type = physical;
+		vector<nullable<die_roll>> damage_dice;
 	};
 
 	class attack
@@ -61,41 +61,61 @@ namespace pathfinder_combat_simulator
 		int attack_modifier_ = 0;
 	};
 
-
 	class mobile_object
 	{
 	public:
 		mobile_object(string id,
-			const int current_hit_points,
-			const int max_hit_points,
-			const int current_armor_class,
+			const int unbuffed_max_hit_points,
+			const int unmodified_current_armor_class,
 			const int perception_skill_check_modifier,
-			shared_ptr<attack> default_attack)
+			nullable<attack> default_attack)
 			:
 			id(std::move(id)),
-			current_hit_points(current_hit_points),
-			max_hit_points(max_hit_points),
-			current_armor_class(current_armor_class),
+			current_hit_points(unbuffed_max_hit_points),
+			unbuffed_max_hit_points(unbuffed_max_hit_points),
+			unmodified_current_armor_class(unmodified_current_armor_class),
 			perception_skill_check_modifier(perception_skill_check_modifier),
 			default_attack(default_attack) { }
 
 		string id;
 		int current_hit_points = 0;
-		int max_hit_points = 0;
-		int current_armor_class = 0;
+		int unbuffed_max_hit_points = 0;
+		int unmodified_current_armor_class = 0;
 		int perception_skill_check_modifier = 0;
-		shared_ptr<attack> default_attack = nullptr;
+		nullable<attack> default_attack = nullptr;
+
+		[[nodiscard]] bool is_dead() const
+		{
+			return current_hit_points <= -10;
+		}
+
+		[[nodiscard]] bool is_unconcious() const
+		{
+			return current_hit_points > -10 && current_hit_points <= 0;
+		}
+
+		[[nodiscard]] bool is_prone() const
+		{
+			return prone;
+		}
+
+
+	private:
+		bool prone = false;
+
 
 		bool operator==(const mobile_object& contained) const
 		{
-			return this->id == contained.id;
+			return id == contained.id;
 		}
 
-		bool operator==(const shared_ptr<mobile_object>& shared) const
+		bool operator==(const nullable<mobile_object>& shared) const
 		{
-			return this->id == shared->id;
+			return id == shared->id;
 		}
 	};
+
+
 
 	class attack_results
 	{
@@ -103,8 +123,8 @@ namespace pathfinder_combat_simulator
 		attack_results() = default;
 
 		int damage_delivered = 0;
-		shared_ptr<mobile_object> target_mob;
-		shared_ptr<mobile_object> attacking_mob;
+		nullable<mobile_object> target_mob;
+		nullable<mobile_object> attacking_mob;
 	};
 
 	using std::cout;
@@ -114,33 +134,38 @@ namespace pathfinder_combat_simulator
 	class user_interface
 	{
 	public:
-		void die(shared_ptr<mobile_object> target_mob) const
+		void die(nullable<mobile_object> target_mob) const
 		{
 			cout << target_mob->id << " has died!" << endl;
 		}
 
-		void knock_out(shared_ptr<mobile_object> target_mob) const
+		void knock_out(nullable<mobile_object> target_mob) const
 		{
 			cout << target_mob->id << " just got knocked out!" << endl;
 		}
-		void process_attack(shared_ptr<mobile_object> mob, int damage_roll, shared_ptr<mobile_object> victim) const
+
+		void process_attack(nullable<mobile_object> mob, int damage_roll, nullable<mobile_object> victim) const
 		{
 			// currently uncalled
 			cout << "Process attack..." << endl;
 		}
-		void receive_damage(shared_ptr<attack_results> results) const
+
+		void receive_damage(nullable<attack_results> results) const
 		{
 			if (results->attacking_mob == nullptr && results->target_mob == nullptr) return;
-			cout << results->attacking_mob->id << " has delivered " << results->damage_delivered << " damage to " << results->target_mob->id << endl;
+			cout << results->attacking_mob->id << " has delivered " << results->damage_delivered << " damage to " << results->target_mob->id << "." << endl;
 		}
+
 		void round_ends(int turn_id) const
 		{
 			cout << "Round " << turn_id << " ends." << endl;
 		}
+
 		void round_starts(int turn_id) const
 		{
 			cout << "Round " << turn_id << " starts." << endl;
 		}
+
 		void output_aggregates(unordered_map<string, int> const& winners) const
 		{
 			// currently uncalled
@@ -149,10 +174,12 @@ namespace pathfinder_combat_simulator
 				cout << winner.first << " Wins : " << winner.second << endl;
 			}
 		}
-		void attack_misses(shared_ptr<mobile_object> mob, shared_ptr<mobile_object> target_mob) const
+
+		void attack_misses(nullable<mobile_object> mob, nullable<mobile_object> target_mob) const
 		{
 			cout << mob->id << " attempted to hit " << target_mob->id << "  but missed." << endl;
 		}
+
 	};
 
 	class mob_and_initiative
@@ -166,11 +193,11 @@ namespace pathfinder_combat_simulator
 	{
 	public:
 		string name;
-		vector<shared_ptr<mobile_object>> combatants;
+		vector<nullable<mobile_object>> combatants;
 
-		[[nodiscard]] bool contains(shared_ptr<mobile_object> contained) const
+		[[nodiscard]] bool contains(nullable<mobile_object> contained) const
 		{
-			for (auto mob : combatants)
+			for (nullable<mobile_object> mob : combatants)
 			{
 				if (mob == contained) return true;
 			}
@@ -178,11 +205,6 @@ namespace pathfinder_combat_simulator
 		}
 	};
 
-	class combat_helper {
-	public:
-		[[nodiscard]] bool is_dead(shared_ptr<mobile_object> mob) const;
-		[[nodiscard]] bool is_unconcious(shared_ptr<mobile_object> mob) const;
-	};
 
 	class battle_results
 	{
@@ -192,20 +214,16 @@ namespace pathfinder_combat_simulator
 	class mob_ai
 	{
 	public:
-		explicit mob_ai(shared_ptr<combat_helper> combat) : _combat(combat) { }
+		explicit mob_ai() = default;
 
-	private:
-		shared_ptr<combat_helper> _combat;
-
-	public:
-		[[nodiscard]] shared_ptr<mobile_object> get_target_for(shared_ptr<mobile_object> item, const vector<shared_ptr<combat_team>>& acgs) const
+		[[nodiscard]] nullable<mobile_object> get_target_for(nullable<mobile_object> item, const vector<nullable<combat_team>>& acgs) const
 		{
-			for (const shared_ptr<combat_team>& team : acgs)
+			for (const nullable<combat_team>& team : acgs)
 			{
 				if (team->contains(item)) continue;
-				for (auto combatant : team->combatants)
+				for (nullable<mobile_object> combatant : team->combatants)
 				{
-					if (!_combat->is_dead(combatant)) 
+					if (!combatant->is_dead()) 
 						return combatant;
 				}
 			}

@@ -75,15 +75,16 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <ItemGroup>
-    <ClCompile Include="..\..\CPlusPlus\PathfinderCombatSimulator.ConsoleCpp\combat_algorithm.cpp" />
     <ClCompile Include="..\..\CPlusPlus\PathfinderCombatSimulator.ConsoleCpp\combat_helper.cpp" />
+    <ClCompile Include="..\..\CPlusPlus\PathfinderCombatSimulator.ConsoleCpp\combat_helper_tests.cpp" />
     <ClCompile Include="..\..\CPlusPlus\PathfinderCombatSimulator.ConsoleCpp\dice_manager.cpp" />
+    <ClCompile Include="..\..\CPlusPlus\PathfinderCombatSimulator.ConsoleCpp\dice_rolling_tests.cpp" />
     <ClCompile Include="..\..\CPlusPlus\PathfinderCombatSimulator.ConsoleCpp\main.cpp" />
-    <ClCompile Include="..\..\CPlusPlus\PathfinderCombatSimulator.ConsoleCpp\test_dice_rolling.cpp" />
-    <ClCompile Include="..\..\CPlusPlus\PathfinderCombatSimulator.ConsoleCpp\user_interface.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\CPlusPlus\PathfinderCombatSimulator.ConsoleCpp\test_dice_rolling.h" />
+    <ClInclude Include="..\..\CPlusPlus\PathfinderCombatSimulator.ConsoleCpp\combat_algorithm.h" />
+    <ClInclude Include="..\..\CPlusPlus\PathfinderCombatSimulator.ConsoleCpp\combat_helper_tests.h" />
+    <ClInclude Include="..\..\CPlusPlus\PathfinderCombatSimulator.ConsoleCpp\dice_rolling_tests.h" />
     <ClInclude Include="..\..\CPlusPlus\PathfinderCombatSimulator.ConsoleCpp\types.h" />
   </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">

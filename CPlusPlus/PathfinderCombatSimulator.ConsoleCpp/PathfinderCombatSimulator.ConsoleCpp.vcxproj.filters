@@ -27,27 +27,9 @@
     <ClCompile Include="dice_manager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="combat_algorithm.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="user_interface.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="combat_helper.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="dice_rolling_tests.cpp">
-      <Filter>Source Files\TestClasses</Filter>
-    </ClCompile>
-    <ClCompile Include="combat_helper_tests.cpp">
-      <Filter>Source Files\TestClasses</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="types.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="combat_helper_tests.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="combat_algorithm.h">
