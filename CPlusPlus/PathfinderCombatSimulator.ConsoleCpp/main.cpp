@@ -42,21 +42,17 @@ private:
 public:
 	void run_test() const override
 	{
-        auto orcWarrior = make_shared<mobile_object>("orcWarrior",  23, 18, 0, make_shared<OrcNeckSplitterAttack>());
+        auto orcWarrior1 = make_shared<mobile_object>("orcWarrior1",  23, 18, 0, make_shared<OrcNeckSplitterAttack>());
+        auto orcWarrior2 = make_shared<mobile_object>("orcWarrior2", 23, 18, 0, make_shared<OrcNeckSplitterAttack>());
         auto orcBrute = make_shared<mobile_object>("orcBrute",  23, 18, 0, make_shared<OrcNeckSplitterAttack>());
         
         vector<shared_ptr<combat_team>> combatGroups; 
         
-        combatGroups.push_back(make_shared<combat_team>("orcWarriorTeam", vector{ orcWarrior }));
+        combatGroups.push_back(make_shared<combat_team>("orcWarriorTeam", vector{ orcWarrior1, orcWarrior2 }));
         combatGroups.push_back(make_shared<combat_team>("orcBruteTeam", vector{ orcBrute }));
         
 		vector<shared_ptr<combat_team>> abc = combatAlgorithm->process_battle_until_only_one_team_is_concious(combatGroups);
-
-        
-
 	}
-
-
 };
 
 
@@ -65,7 +61,6 @@ int main()
     auto seed = time(nullptr);
     srand(static_cast<unsigned int> (seed));
     cout << "Hit a key to begin...\n";
-
     if (!getchar()) return 0;
 
     auto diceManager = make_shared<dice_manager>();
