@@ -15,7 +15,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CPlusPlus", "CPlusPlus", "{
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PathfinderCombatSimulator.ConsoleCpp", "CPlusPlus\PathfinderCombatSimulator.ConsoleCpp\PathfinderCombatSimulator.ConsoleCpp.vcxproj", "{940482CA-A24B-4749-98AC-639450F66D3F}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PathfinderCombatSimulator.ConsoleGpp", "Gpp\PathfinderCombatSimulator.ConsoleGpp\PathfinderCombatSimulator.ConsoleGpp.vcxproj", "{FFC54932-7F85-4DEA-906D-884235DEB6BE}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PathfinderCombatSimulator.ConsoleGpp", "CPlusPlus\PathfinderCombatSimulator.ConsoleGpp\PathfinderCombatSimulator.ConsoleGpp.vcxproj", "{FFC54932-7F85-4DEA-906D-884235DEB6BE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

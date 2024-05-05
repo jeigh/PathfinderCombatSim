@@ -1,12 +1,11 @@
 #include <iostream>
+#include <thread>
 
-
-#include "dice_rolling_tests.h"
-#include "combat_algorithm.h"
 #include "types.h"
 
 using std::cout;
 using std::string;
+using std::make_shared;
 
 using namespace pathfinder_combat_simulator;
 
@@ -16,7 +15,7 @@ class OrcNeckSplitterAttack : public attack
 public:
 	OrcNeckSplitterAttack()
 	{
-        shared_ptr<die_roll> theDamageDice = make_shared<die_roll>();
+        nullable<die_roll> theDamageDice = make_shared<die_roll>();
 
         theDamageDice->die_count = 1;
         theDamageDice->die_size = 8;
@@ -31,56 +30,83 @@ public:
 };
 
 
-class combat_algorithm_tests : public testClassBase
+class combat_algorithm_tests 
 {
 public:
-	explicit combat_algorithm_tests(const shared_ptr<combat_algorithm>& combat_algorithm) : combatAlgorithm(combat_algorithm)	{ }
+	explicit combat_algorithm_tests(const nullable<combat_algorithm>& combat_algorithm, int battle_id) : combatAlgorithm(combat_algorithm), battle_id_(battle_id) { }
 
 private:
-    shared_ptr<combat_algorithm> combatAlgorithm;
+    nullable<combat_algorithm> combatAlgorithm;
+    int battle_id_;
 
 public:
-	void run_test() const override
+	void run_test() const 
 	{
-        auto orcWarrior1 = make_shared<mobile_object>("orcWarrior1",  23, 18, 0, make_shared<OrcNeckSplitterAttack>());
-        auto orcWarrior2 = make_shared<mobile_object>("orcWarrior2", 23, 18, 0, make_shared<OrcNeckSplitterAttack>());
-        auto orcBrute = make_shared<mobile_object>("orcBrute",  23, 18, 0, make_shared<OrcNeckSplitterAttack>());
+        // brutes
+        auto ugthar = make_shared<mobile_object>("Ugthar collector of toes", 30, 18, 0, make_shared<OrcNeckSplitterAttack>());
+        auto bloodfist = make_shared<mobile_object>("Bloodfist the cannibal", 30, 18, 0, make_shared<OrcNeckSplitterAttack>());
+
+		// warriors
+        auto thaddeus = make_shared<mobile_object>("Thaddeus the Angry", 23, 18, 0, make_shared<OrcNeckSplitterAttack>());
+        auto diosthenes = make_shared<mobile_object>("Diosthenes the Pensive", 23, 18, 0, make_shared<OrcNeckSplitterAttack>());
+
+        // cowards
+        auto timmidides = make_shared<mobile_object>("Timmidides the coward", 11, 18, 0, make_shared<OrcNeckSplitterAttack>());
+        auto squeaks = make_shared<mobile_object>("Squeaks", 10, 18, 0, make_shared<OrcNeckSplitterAttack>());
         
-        vector<shared_ptr<combat_team>> combatGroups; 
         
-        combatGroups.push_back(make_shared<combat_team>("orcWarriorTeam", vector{ orcWarrior1, orcWarrior2 }));
-        combatGroups.push_back(make_shared<combat_team>("orcBruteTeam", vector{ orcBrute }));
+
+		
         
-		vector<shared_ptr<combat_team>> abc = combatAlgorithm->process_battle_until_only_one_team_is_concious(combatGroups);
+
+        vector<nullable<combat_team>> combatGroups; 
+        
+        combatGroups.push_back(make_shared<combat_team>("Clan Foesmash", vector{ thaddeus, ugthar  }));
+        combatGroups.push_back(make_shared<combat_team>("Clan Skullmugs", vector{ bloodfist, timmidides }));
+
+        // enable when multiple groups work
+        //combatGroups.push_back(make_shared<combat_team>("Clan Femurclub", vector{ diosthenes, squeaks }));
+
+        auto the_battle = make_shared<battle>(battle_id_, combatGroups);
+
+		combatAlgorithm->process_battle_until_only_one_team_is_concious(the_battle);
 	}
 };
+
 
 
 int main() 
 {
     auto seed = time(nullptr);
-    srand(static_cast<unsigned int> (seed));
+
+    srand(static_cast<unsigned int>(seed));
+
     cout << "Hit a key to begin...\n";
-    if (!getchar()) return 0;
+
+	if (!getchar()) return 0;
 
     auto diceManager = make_shared<dice_manager>();
-    auto userInterface = make_shared<user_interface>();
+    auto ui_mutex = std::make_shared<std::shared_mutex>();
+    auto userInterface = make_shared<user_interface>(ui_mutex, output_level::low);
 
     auto mobAi = make_shared <mob_ai>();
     auto combatAlgorithm = make_shared<combat_algorithm>(diceManager, userInterface, mobAi);
 
-	auto combatAlgorithmTests = make_shared<combat_algorithm_tests>(combatAlgorithm);
-	auto tests = vector<shared_ptr<testClassBase>>();
-    
-    tests.push_back(combatAlgorithmTests);
-
-    for (int i = 0; i < 10000; ++i)
+    vector<std::shared_ptr<std::thread>> the_threads;
+    for (int i = 0; i < 1; ++i)
     {
-	    for (shared_ptr<testClassBase> test : tests)
-	    {
-            test->run_test();
-	    }    	
+        auto combatAlgorithmTests = make_shared<combat_algorithm_tests>(combatAlgorithm, i);
+        auto back_pushable = std::make_shared<std::thread> ([combatAlgorithmTests] { combatAlgorithmTests->run_test(); });
+        the_threads.push_back(back_pushable);
     }
+
+    for (std::shared_ptr<std::thread> the_thread : the_threads)
+    {
+        the_thread->join();
+    }
+
+
+
     cout << "yeah\n";
 
 }

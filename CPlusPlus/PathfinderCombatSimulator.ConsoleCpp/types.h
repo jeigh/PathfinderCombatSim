@@ -4,7 +4,8 @@
 #include <vector>
 #include <string>
 #include <memory>
-#include <iostream>
+#include <mutex>
+#include <shared_mutex>
 
 
 using std::vector;
@@ -18,6 +19,12 @@ using std::tuple;
 namespace pathfinder_combat_simulator 
 {
 
+	enum damage_type
+	{
+		none,
+		physical = 1,
+		poison = 2
+	};
 
 	class die_roll
 	{
@@ -30,20 +37,6 @@ namespace pathfinder_combat_simulator
 		int die_size = 0;
 		int die_count = 1;
 		int modifer_after_addition = 0;
-	};
-
-	class dice_manager
-	{
-	public:
-		[[nodiscard]] int add_rolls(const vector<nullable<die_roll>> dice) const;
-		[[nodiscard]] int roll(const int die_size) const;
-	};
-
-	enum damage_type
-	{
-		none,
-		physical = 1,
-		poison = 2
 	};
 
 	class damage_effect
@@ -84,38 +77,37 @@ namespace pathfinder_combat_simulator
 		int perception_skill_check_modifier = 0;
 		nullable<attack> default_attack = nullptr;
 
-		[[nodiscard]] bool is_dead() const
-		{
-			return current_hit_points <= -10;
-		}
-
-		[[nodiscard]] bool is_unconcious() const
-		{
-			return current_hit_points > -10 && current_hit_points <= 0;
-		}
-
-		[[nodiscard]] bool is_prone() const
-		{
-			return prone;
-		}
+		[[nodiscard]] bool is_dead() const;
+		[[nodiscard]] bool is_unconcious() const;
+		[[nodiscard]] bool is_prone() const;
 
 
 	private:
 		bool prone = false;
-
-
-		bool operator==(const mobile_object& contained) const
-		{
-			return id == contained.id;
-		}
-
-		bool operator==(const nullable<mobile_object>& shared) const
-		{
-			return id == shared->id;
-		}
+		[[nodiscard]] bool operator==(const mobile_object& contained) const;
+		[[nodiscard]] bool operator==(const nullable<mobile_object>& shared) const;
 	};
 
 
+	class combat_team
+	{
+	public:
+		string name;
+		vector<nullable<mobile_object>> combatants;
+
+		[[nodiscard]] auto contains(nullable<mobile_object> contained) const -> bool;
+
+	};
+
+	class battle
+	{
+	public:
+		battle(int id, const vector<std::shared_ptr<combat_team>>& combat_teams) :
+			id(id), combat_teams(combat_teams) { }
+
+		int id;
+		vector<nullable<combat_team>> combat_teams;
+	};
 
 	class attack_results
 	{
@@ -127,59 +119,32 @@ namespace pathfinder_combat_simulator
 		nullable<mobile_object> attacking_mob;
 	};
 
-	using std::cout;
-	using std::pair;
-	using std::endl;
+	enum class output_level
+	{
+		none = 0,
+		low = 1,
+		medium = 2,
+		high = 3,
+		max_verbosity = 4
+	};
+
 
 	class user_interface
 	{
 	public:
-		void die(nullable<mobile_object> target_mob) const
-		{
-			cout << target_mob->id << " has died!" << endl;
-		}
+		explicit user_interface(nullable<std::shared_mutex> ui_mutex, output_level level) : _ui_mutex(ui_mutex), _level(level) {	}
 
-		void knock_out(nullable<mobile_object> target_mob) const
-		{
-			cout << target_mob->id << " just got knocked out!" << endl;
-		}
-
-		void process_attack(nullable<mobile_object> mob, int damage_roll, nullable<mobile_object> victim) const
-		{
-			// currently uncalled
-			cout << "Process attack..." << endl;
-		}
-
-		void receive_damage(nullable<attack_results> results) const
-		{
-			if (results->attacking_mob == nullptr && results->target_mob == nullptr) return;
-			cout << results->attacking_mob->id << " has delivered " << results->damage_delivered << " damage to " << results->target_mob->id << "." << endl;
-		}
-
-		void round_ends(int turn_id) const
-		{
-			cout << "Round " << turn_id << " ends." << endl;
-		}
-
-		void round_starts(int turn_id) const
-		{
-			cout << "Round " << turn_id << " starts." << endl;
-		}
-
-		void output_aggregates(unordered_map<string, int> const& winners) const
-		{
-			// currently uncalled
-			for (const pair<string, int> winner : winners)
-			{
-				cout << winner.first << " Wins : " << winner.second << endl;
-			}
-		}
-
-		void attack_misses(nullable<mobile_object> mob, nullable<mobile_object> target_mob) const
-		{
-			cout << mob->id << " attempted to hit " << target_mob->id << "  but missed." << endl;
-		}
-
+		void die(nullable<battle>, nullable<mobile_object> target_mob) const;
+		void knock_out(nullable<battle>, nullable<mobile_object> target_mob) const;
+		void process_attack(nullable<battle>, nullable<mobile_object> mob, int damage_roll, nullable<mobile_object> victim) const;
+		void receive_damage(nullable<battle>, nullable<attack_results> results) const;
+		void round_ends(nullable<battle>, int turn_id) const;
+		void round_starts(nullable<battle>, int turn_id) const;
+		void output_aggregates(nullable<battle>, unordered_map<string, int> const& winners) const;
+		void attack_misses(nullable<battle>, nullable<mobile_object> mob, const nullable<mobile_object> target_mob) const;
+	private:
+		nullable<std::shared_mutex> _ui_mutex;
+		output_level _level;
 	};
 
 	class mob_and_initiative
@@ -189,58 +154,70 @@ namespace pathfinder_combat_simulator
 		int initiative_roll;
 	};
 
-	class combat_team
+
+
+
+	class mob_ai
 	{
 	public:
-		string name;
-		vector<nullable<mobile_object>> combatants;
+		explicit mob_ai() = default;
 
-		[[nodiscard]] bool contains(nullable<mobile_object> contained) const
-		{
-			for (nullable<mobile_object> mob : combatants)
-			{
-				if (mob == contained) return true;
-			}
-			return false;
-		}
+		[[nodiscard]] auto get_target_for(nullable<mobile_object> item, const vector<nullable<combat_team>>& acgs) const ->
+			nullable<mobile_object>;
+
 	};
 
+	class dice_manager
+	{
+	public:
+		[[nodiscard]] int add_rolls(const vector<nullable<die_roll>> dice) const;
+		[[nodiscard]] int roll(const int die_size) const;
+	};
+
+
+	class combat_algorithm
+	{
+	public:
+		combat_algorithm(
+			nullable<dice_manager> rng,
+			nullable<user_interface> ui,
+			nullable<mob_ai> ai)
+			:
+			_rng(rng),
+			_ui(ui),
+			_ai(ai) {}
+
+		[[nodiscard]] vector<nullable<tuple<nullable<mobile_object>, int>>> roll_and_order_by_initiative(vector<nullable<combat_team>> const groups) const;
+		[[nodiscard]] int roll_initiative(nullable<mobile_object> const actor) const;
+		[[nodiscard]] bool is_combat_still_active(vector<nullable<combat_team>> const combat_groups) const;
+		[[nodiscard]] nullable<unordered_map<damage_type, int>> roll_damage(vector<damage_effect> const damage_effects) const;
+		[[nodiscard]] int roll_to_hit(int const number_of_previous_attacks_this_turn, int const attack_modifier) const;
+
+		void process_battle_until_only_one_team_is_concious(const nullable<battle>) const;
+
+
+	private:
+		nullable<dice_manager> _rng;
+		nullable<user_interface> _ui;
+		nullable<mob_ai> _ai;
+
+		[[nodiscard]] bool still_lives(nullable<combat_team> const acg) const;
+		[[nodiscard]] nullable<int> calculate_modified_ac(nullable<mobile_object> const victim) const;
+		[[nodiscard]] nullable<attack_results> attack(nullable<mobile_object> const attacker, nullable<mobile_object> const victim, int const number_of_previous_attacks_made_this_turn) const;
+		[[nodiscard]] bool has_available_action_this_turn(nullable<mobile_object> const mob) const;
+
+		void process_action(nullable<battle> the_battle, int const action_number, nullable<mobile_object> acting_mob, unordered_map<nullable<mobile_object>, int> dictionary_of_previous_attack_counts) const;
+		
+
+	};
 
 	class battle_results
 	{
 	public:
 		vector<combat_team> groups;
 	};
-	class mob_ai
-	{
-	public:
-		explicit mob_ai() = default;
-
-		[[nodiscard]] nullable<mobile_object> get_target_for(nullable<mobile_object> item, const vector<nullable<combat_team>>& acgs) const
-		{
-			for (const nullable<combat_team>& team : acgs)
-			{
-				if (team->contains(item)) continue;
-				for (nullable<mobile_object> combatant : team->combatants)
-				{
-					if (!combatant->is_dead()) 
-						return combatant;
-				}
-			}
-			return nullptr;
-		}
-	};
 
 
-
-
-
-
-	class testClassBase
-	{
-	public:
-		virtual void run_test() const = 0;
-	};
 
 
 }

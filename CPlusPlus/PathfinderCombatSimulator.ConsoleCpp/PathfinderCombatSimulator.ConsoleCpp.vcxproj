@@ -128,12 +128,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="combat_process.cpp" />
+    <ClCompile Include="combat_team.cpp" />
     <ClCompile Include="dice_manager.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="dice_rolling_tests.h" />
+    <ClCompile Include="mobile_object.cpp" />
+    <ClCompile Include="mob_ai.cpp" />
+    <ClCompile Include="user_interface.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="combat_algorithm.h" />
     <ClInclude Include="types.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
