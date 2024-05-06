@@ -23,12 +23,13 @@ Future Feature List
 
 Here is a list of the current Feature Matrix...
 
-|Feature|C++ version|C# Version|
+|Feature|C++ Version|C# Version|
 |-------------------------------------------------|-|-|
 |Simple Turn-Based Combat, Death, Unconciousness  |✅|✅|
 |Simple Console-based UI                          |✅|✅|
 |Multi-Team support                               | |✅|
 |Multi-Threading support                          |✅||
+|Properly Functioning Initiative                  |✅|(unconfirmed)|
 |User Input  |||
 |Database Persistence |||
 |Simple 2D Battlefield Mechanics (Movement) |||
