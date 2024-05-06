@@ -31,8 +31,8 @@ using namespace pathfinder_combat_simulator;
 	static std::mutex your_mutex;
 	your_mutex.lock();
 	auto returnable = rand() % die_size + 1;
-	//std::cout << "rolled " << returnable << " on a d" << die_size << std::endl;
 	your_mutex.unlock();
 	return returnable;
 }
+
 

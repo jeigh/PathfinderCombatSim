@@ -33,10 +33,10 @@ public:
 class combat_algorithm_tests 
 {
 public:
-	explicit combat_algorithm_tests(const nullable<combat_algorithm>& combat_algorithm, int battle_id) : combatAlgorithm(combat_algorithm), battle_id_(battle_id) { }
+	explicit combat_algorithm_tests(const nullable<combat_process>& combat_algorithm, int battle_id) : combatAlgorithm(combat_algorithm), battle_id_(battle_id) { }
 
 private:
-    nullable<combat_algorithm> combatAlgorithm;
+    nullable<combat_process> combatAlgorithm;
     int battle_id_;
 
 public:
@@ -90,10 +90,10 @@ int main()
     auto userInterface = make_shared<user_interface>(ui_mutex, output_level::low);
 
     auto mobAi = make_shared <mob_ai>();
-    auto combatAlgorithm = make_shared<combat_algorithm>(diceManager, userInterface, mobAi);
+    auto combatAlgorithm = make_shared<combat_process>(diceManager, userInterface, mobAi);
 
     vector<std::shared_ptr<std::thread>> the_threads;
-    for (int i = 0; i < 1; ++i)
+    for (int i = 0; i < 100; ++i)
     {
         auto combatAlgorithmTests = make_shared<combat_algorithm_tests>(combatAlgorithm, i);
         auto back_pushable = std::make_shared<std::thread> ([combatAlgorithmTests] { combatAlgorithmTests->run_test(); });

@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "types.h"
 
 using namespace pathfinder_combat_simulator;
@@ -5,29 +7,12 @@ using namespace pathfinder_combat_simulator;
 using std::make_shared;
 using std::logic_error;
 
-int combat_algorithm::roll_initiative(nullable<mobile_object> const actor) const
+int combat_process::roll_initiative(nullable<mobile_object> const actor) const
 {
 	return actor->perception_skill_check_modifier + _rng->roll(20);
 }
 
-vector<nullable<tuple<nullable<mobile_object>, int>>> combat_algorithm::roll_and_order_by_initiative(vector<nullable<combat_team>> const groups) const
-{
-	auto initiative_table = vector<nullable<tuple<nullable<mobile_object>, int>>>();
-
-	for (nullable<combat_team> group : groups)
-	{
-		for (nullable<mobile_object> combatant : group->combatants)
-		{
-			int rolled = roll_initiative(combatant);
-			auto back_pushable = make_shared<tuple<nullable<mobile_object>, int>>(combatant, rolled);
-			initiative_table.push_back(back_pushable);
-		}
-	}
-
-	return initiative_table;
-}
-
-bool combat_algorithm::is_combat_still_active(vector<nullable<combat_team>> const combat_groups) const
+bool combat_process::is_combat_still_active(vector<nullable<combat_team>> const combat_groups) const
 {
 	auto alive_count = 0;
 	for (nullable<combat_team> combat_group : combat_groups)
@@ -37,7 +22,7 @@ bool combat_algorithm::is_combat_still_active(vector<nullable<combat_team>> cons
 	return (alive_count > 1);
 }
 
-nullable< unordered_map<damage_type, int>> combat_algorithm::roll_damage(vector<damage_effect> const damage_effects) const
+nullable< unordered_map<damage_type, int>> combat_process::roll_damage(vector<damage_effect> const damage_effects) const
 {
 	auto returnable = make_shared<unordered_map<damage_type, int>>();
 
@@ -55,40 +40,48 @@ nullable< unordered_map<damage_type, int>> combat_algorithm::roll_damage(vector<
 	return returnable;
 }
 
-int combat_algorithm::roll_to_hit(int const number_of_previous_attacks_this_turn, int const attack_modifier) const
+[[nodiscard]] int combat_process::roll_to_hit(nullable<mobile_object> mob) const
 {
-	return _rng->roll(20) + attack_modifier - (number_of_previous_attacks_this_turn * 5);
+	return _rng->roll(20) + mob->default_attack->attack_modifier_ - (mob->number_of_previous_attacks_made_this_turn * 5);
 }
 
-void combat_algorithm::process_battle_until_only_one_team_is_concious(const nullable<battle> the_battle) const
+void combat_process::process_battle_until_only_one_team_is_concious(nullable<battle> the_battle)
 {
-	if (the_battle->combat_teams.size() > 2) throw logic_error("Only two or fewer combat groups are supported.");
-	auto sorted_initiative = roll_and_order_by_initiative(the_battle->combat_teams);
+
 	int roundId = 1;
 	while (is_combat_still_active(the_battle->combat_teams))
 	{
+		auto table = roll_and_order_by_initiative(the_battle);
+
 		_ui->round_starts(the_battle, roundId);
-		auto previous_attack_count_for_mob_this_round = vector<tuple<nullable<mobile_object>, int>>();
-		for (const nullable<tuple<nullable<mobile_object>, int>>& kvp : sorted_initiative)
+		for (std::shared_ptr<mobile_object> mob : table->get_ordered_mobs())
 		{
-			nullable<mobile_object> mob = std::get<0>(*kvp);
-			auto initiative_roll = std::get<1>(*kvp);
-
-			unordered_map<nullable<mobile_object>, int> mapified;
-			for (tuple<nullable<mobile_object>, int> the_tuple : previous_attack_count_for_mob_this_round)
-				mapified.insert({ std::get<0>(the_tuple), std::get<1>(the_tuple) });
-
-			if (has_available_action_this_turn(mob)) process_action(the_battle, 1, mob, mapified);
-			if (has_available_action_this_turn(mob)) process_action(the_battle,2, mob, mapified);
-			if (has_available_action_this_turn(mob)) process_action(the_battle, 3, mob, mapified);
+			if (has_available_action_this_turn(mob)) process_action(the_battle, 1, mob);
+			if (has_available_action_this_turn(mob)) process_action(the_battle, 2, mob);
+			if (has_available_action_this_turn(mob)) process_action(the_battle, 3, mob);
 		}
 		_ui->round_ends(the_battle, roundId);
+		the_battle->round_ends();
 		roundId++;
 	}
 }
 
+[[nodiscard]] nullable<initiative_table> combat_process::roll_and_order_by_initiative(nullable<battle> the_battle) const
+{
+	auto table = make_shared<initiative_table>();
+	for (nullable<combat_team> const combat_team : the_battle->combat_teams)
+	{
+		for (nullable<mobile_object> const combatant : combat_team->combatants)
+		{
+			int roll_value = roll_initiative(combatant);
+			table->add_roll_by_mob(combatant, roll_value);
+		}
+	}
+	return table;
+}
 
-bool combat_algorithm::still_lives(nullable<combat_team> const acg) const
+
+bool combat_process::still_lives(nullable<combat_team> const acg) const
 {
 	for (nullable<mobile_object> mob : acg->combatants)
 	{
@@ -97,7 +90,7 @@ bool combat_algorithm::still_lives(nullable<combat_team> const acg) const
 	return false;
 }
 
-nullable<int> combat_algorithm::calculate_modified_ac(nullable<mobile_object> const victim) const
+nullable<int> combat_process::calculate_modified_ac(nullable<mobile_object> const victim) const
 {
 	nullable<int> modified_armor_class = make_shared<int>(victim->unmodified_current_armor_class);
 
@@ -106,15 +99,13 @@ nullable<int> combat_algorithm::calculate_modified_ac(nullable<mobile_object> co
 	return modified_armor_class;
 }
 
-nullable<attack_results> combat_algorithm::attack(
+nullable<attack_results> combat_process::attack(
 	nullable<mobile_object> const attacker,
-	nullable<mobile_object> const victim,
-	int const number_of_previous_attacks_made_this_turn) const
+	nullable<mobile_object> const victim) const
 {
 	if (attacker->default_attack != nullptr)
 	{
-		const int attack_value = roll_to_hit(number_of_previous_attacks_made_this_turn,
-			attacker->default_attack->attack_modifier_);
+		const int attack_value = roll_to_hit(attacker);
 
 		nullable<int> modified_armor_class = calculate_modified_ac(victim);
 
@@ -139,36 +130,30 @@ nullable<attack_results> combat_algorithm::attack(
 			//todo: apply saving throw feature?
 			return returnable;
 		}
+		attacker->number_of_previous_attacks_made_this_turn += 1;
 	}
 	return nullptr;
 }
 
-void combat_algorithm::process_action(
+void combat_process::process_action(
 	nullable<battle> the_battle,
 	int const action_number,
-	nullable<mobile_object> acting_mob,
-	unordered_map<nullable<mobile_object>, int> dictionary_of_previous_attack_counts) const
+	nullable<mobile_object> acting_mob) const
 {
 	nullable<mobile_object> target_mob = _ai->get_target_for(acting_mob, the_battle->combat_teams);
 	if (target_mob != nullptr && !acting_mob->is_dead() && !acting_mob->is_unconcious())
 	{
 		nullable<mobile_object> victim = target_mob;
+		auto results = attack(acting_mob, victim);
 
-		int prev_attacks = 0;
-		if (dictionary_of_previous_attack_counts.contains(acting_mob))
-			prev_attacks = dictionary_of_previous_attack_counts.at(acting_mob);
-
-		auto results = attack(acting_mob, victim, prev_attacks);
-		if (dictionary_of_previous_attack_counts.contains(acting_mob))
-			dictionary_of_previous_attack_counts.at(acting_mob) = prev_attacks++;
-
-		else if (results != nullptr && results->target_mob != nullptr)
+		if (results != nullptr && results->target_mob != nullptr)
 		{
 			if (results->damage_delivered <= 0)
 			{
 				_ui->attack_misses(the_battle, acting_mob, victim);
 				return;
 			}
+
 			const int previous_hit_points = results->target_mob->current_hit_points;
 			const int updated_hit_points = previous_hit_points - results->damage_delivered;
 			results->target_mob->current_hit_points = updated_hit_points;
@@ -184,7 +169,8 @@ void combat_algorithm::process_action(
 	}
 }
 
-bool combat_algorithm::has_available_action_this_turn(nullable<mobile_object> const mob) const
+bool combat_process::has_available_action_this_turn(nullable<mobile_object> const mob) const
 {
+	//todo: correct this logic
 	return true;
 }

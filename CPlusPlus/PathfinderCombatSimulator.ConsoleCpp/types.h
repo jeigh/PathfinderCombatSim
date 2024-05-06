@@ -75,6 +75,7 @@ namespace pathfinder_combat_simulator
 		int unbuffed_max_hit_points = 0;
 		int unmodified_current_armor_class = 0;
 		int perception_skill_check_modifier = 0;
+		int number_of_previous_attacks_made_this_turn = 0;
 		nullable<attack> default_attack = nullptr;
 
 		[[nodiscard]] bool is_dead() const;
@@ -107,6 +108,10 @@ namespace pathfinder_combat_simulator
 
 		int id;
 		vector<nullable<combat_team>> combat_teams;
+		void round_ends();
+
+	private:
+		[[nodiscard]] vector<nullable<mobile_object>> get_combatants() const;
 	};
 
 	class attack_results
@@ -123,9 +128,10 @@ namespace pathfinder_combat_simulator
 	{
 		none = 0,
 		low = 1,
-		medium = 2,
-		high = 3,
-		max_verbosity = 4
+		mediumlow = 2,
+		medium = 3,
+		high = 4,
+		max = 5
 	};
 
 
@@ -174,27 +180,42 @@ namespace pathfinder_combat_simulator
 		[[nodiscard]] int roll(const int die_size) const;
 	};
 
-
-	class combat_algorithm
+	class initiative_entry
 	{
 	public:
-		combat_algorithm(
-			nullable<dice_manager> rng,
-			nullable<user_interface> ui,
-			nullable<mob_ai> ai)
-			:
-			_rng(rng),
-			_ui(ui),
-			_ai(ai) {}
+		nullable<mobile_object> mob;
+		int initiative_roll = 0;
+	};
 
-		[[nodiscard]] vector<nullable<tuple<nullable<mobile_object>, int>>> roll_and_order_by_initiative(vector<nullable<combat_team>> const groups) const;
+
+	class initiative_table
+	{
+	public:
+		void add_roll_by_mob(nullable<mobile_object>, int);
+
+		
+		//nullable<std::map<nullable<mobile_object>, int>> map_;
+		vector<nullable<mobile_object>> get_ordered_mobs();
+
+	//private:
+		vector<nullable<initiative_entry>> raw;
+	};
+
+	class combat_process
+	{
+	public:
+		combat_process(nullable<dice_manager> rng, nullable<user_interface> ui, nullable<mob_ai> ai) :
+			_rng(rng), _ui(ui), _ai(ai) {}
+
+		
+		[[nodiscard]] nullable<initiative_table> roll_and_order_by_initiative(nullable<battle> the_battle) const;
 		[[nodiscard]] int roll_initiative(nullable<mobile_object> const actor) const;
 		[[nodiscard]] bool is_combat_still_active(vector<nullable<combat_team>> const combat_groups) const;
 		[[nodiscard]] nullable<unordered_map<damage_type, int>> roll_damage(vector<damage_effect> const damage_effects) const;
-		[[nodiscard]] int roll_to_hit(int const number_of_previous_attacks_this_turn, int const attack_modifier) const;
+		//[[nodiscard]] int roll_to_hit(nullable<mobile_object> mob, int const attack_modifier) const;
+		[[nodiscard]] int roll_to_hit(nullable<mobile_object> mob) const;
 
-		void process_battle_until_only_one_team_is_concious(const nullable<battle>) const;
-
+		void process_battle_until_only_one_team_is_concious(const nullable<battle>);
 
 	private:
 		nullable<dice_manager> _rng;
@@ -203,12 +224,10 @@ namespace pathfinder_combat_simulator
 
 		[[nodiscard]] bool still_lives(nullable<combat_team> const acg) const;
 		[[nodiscard]] nullable<int> calculate_modified_ac(nullable<mobile_object> const victim) const;
-		[[nodiscard]] nullable<attack_results> attack(nullable<mobile_object> const attacker, nullable<mobile_object> const victim, int const number_of_previous_attacks_made_this_turn) const;
+		[[nodiscard]] nullable<attack_results> attack(nullable<mobile_object> const attacker, nullable<mobile_object> const victim) const;
 		[[nodiscard]] bool has_available_action_this_turn(nullable<mobile_object> const mob) const;
 
-		void process_action(nullable<battle> the_battle, int const action_number, nullable<mobile_object> acting_mob, unordered_map<nullable<mobile_object>, int> dictionary_of_previous_attack_counts) const;
-		
-
+		void process_action(nullable<battle> the_battle, int const action_number, nullable<mobile_object> acting_mob) const;
 	};
 
 	class battle_results

@@ -7,6 +7,20 @@ using std::endl;
 
 using namespace pathfinder_combat_simulator;
 
+void user_interface::output_aggregates(nullable<battle> the_battle, unordered_map<string, int> const& winners) const
+{
+	if (_level < output_level::low) return;
+	_ui_mutex->lock();
+
+	// currently uncalled
+	for (const pair<string, int> winner : winners)
+	{
+		cout << "Battle " << the_battle->id << ": " << winner.first << " Wins : " << winner.second << endl;
+	}
+
+	_ui_mutex->unlock();
+}
+
 void user_interface::die(nullable<battle> the_battle, nullable<mobile_object> target_mob) const
 {
 	if (_level < output_level::low) return;
@@ -17,23 +31,12 @@ void user_interface::die(nullable<battle> the_battle, nullable<mobile_object> ta
 	_ui_mutex->unlock();
 }
 
-void user_interface::knock_out(nullable<battle> the_battle, nullable<mobile_object> target_mob) const
+void user_interface::attack_misses(nullable<battle> the_battle, nullable<mobile_object> mob, const nullable<mobile_object> target_mob) const
 {
-	if (_level < output_level::low) return;
+	if (_level < output_level::medium) return;
 	_ui_mutex->lock();
 
-	cout << "Battle " << the_battle->id << ": " << target_mob->id << " just got knocked out!" << endl;
-
-	_ui_mutex->unlock();
-}
-
-void user_interface::process_attack(nullable<battle> the_battle, nullable<mobile_object> mob, int damage_roll, nullable<mobile_object> victim) const
-{
-	// currently uncalled
-	if (_level < output_level::max_verbosity) return;
-	_ui_mutex->lock();
-
-	cout << "Battle " << the_battle->id << ": Process attack..." << endl;
+	cout << "Battle " << the_battle->id << ": " << mob->id << " attempted to hit " << target_mob->id << "  but missed." << endl;
 
 	_ui_mutex->unlock();
 }
@@ -54,9 +57,32 @@ void user_interface::receive_damage(nullable<battle> the_battle, nullable<attack
 	_ui_mutex->unlock();
 }
 
+
+void user_interface::knock_out(nullable<battle> the_battle, nullable<mobile_object> target_mob) const
+{
+	if (_level < output_level::high) return;
+	_ui_mutex->lock();
+
+	cout << "Battle " << the_battle->id << ": " << target_mob->id << " just got knocked out!" << endl;
+
+	_ui_mutex->unlock();
+}
+
+void user_interface::process_attack(nullable<battle> the_battle, nullable<mobile_object> mob, int damage_roll, nullable<mobile_object> victim) const
+{
+	// currently uncalled
+	if (_level < output_level::high) return;
+	_ui_mutex->lock();
+
+	cout << "Battle " << the_battle->id << ": Process attack..." << endl;
+
+	_ui_mutex->unlock();
+}
+
+
 void user_interface::round_ends(nullable<battle> the_battle, int turn_id) const
 {
-	if (_level < output_level::max_verbosity) return;
+	if (_level < output_level::max) return;
 	_ui_mutex->lock();
 
 	cout << "Battle " << the_battle->id << ": Round " << turn_id << " ends." << endl;
@@ -66,7 +92,7 @@ void user_interface::round_ends(nullable<battle> the_battle, int turn_id) const
 
 void user_interface::round_starts(nullable<battle> the_battle, int turn_id) const
 {
-	if (_level < output_level::max_verbosity) return;
+	if (_level < output_level::max) return;
 	_ui_mutex->lock();
 
 	cout << "Battle " << the_battle->id << ": Round " << turn_id << " starts." << endl;
@@ -74,26 +100,5 @@ void user_interface::round_starts(nullable<battle> the_battle, int turn_id) cons
 	_ui_mutex->unlock();
 }
 
-void user_interface::output_aggregates(nullable<battle> the_battle, unordered_map<string, int> const& winners) const
-{
-	if (_level < output_level::low) return;
-	_ui_mutex->lock();
 
-	// currently uncalled
-	for (const pair<string, int> winner : winners)
-	{
-		cout << "Battle " << the_battle->id << ": " << winner.first << " Wins : " << winner.second << endl;
-	}
 
-	_ui_mutex->unlock();
-}
-
-void user_interface::attack_misses(nullable<battle> the_battle, nullable<mobile_object> mob, const nullable<mobile_object> target_mob) const
-{
-	if (_level < output_level::high) return;
-	_ui_mutex->lock();
-
-	cout << "Battle " << the_battle->id << ": " << mob->id << " attempted to hit " << target_mob->id << "  but missed." << endl;
-
-	_ui_mutex->unlock();
-}
