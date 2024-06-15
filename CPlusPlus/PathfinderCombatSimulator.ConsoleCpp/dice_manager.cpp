@@ -6,11 +6,11 @@
 
 using namespace pathfinder_combat_simulator;
 
-[[nodiscard]] int dice_manager::add_rolls(const vector<nullable<die_roll>> dice) const
+[[nodiscard]] int dice_manager::add_rolls(const vector<shared_ptr<die_roll>> dice) const
 {
 	int returnable = 0;
 
-	for (nullable<die_roll> d : dice)
+	for (shared_ptr<die_roll> d : dice)
 	{
 		int rollsLeft = d->die_count;
 		while (rollsLeft > 0)

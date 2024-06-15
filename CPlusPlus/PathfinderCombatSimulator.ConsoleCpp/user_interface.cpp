@@ -1,5 +1,6 @@
 #include "types.h"
 #include <iostream>
+#include <algorithm>
 
 using std::cout;
 using std::pair;
@@ -7,7 +8,7 @@ using std::endl;
 
 using namespace pathfinder_combat_simulator;
 
-void user_interface::output_aggregates(nullable<battle> the_battle, unordered_map<string, int> const& winners) const
+void user_interface::output_aggregates(shared_ptr<battle> the_battle, unordered_map<string, int> const& winners) const
 {
 	if (_level < output_level::low) return;
 	_ui_mutex->lock();
@@ -21,7 +22,7 @@ void user_interface::output_aggregates(nullable<battle> the_battle, unordered_ma
 	_ui_mutex->unlock();
 }
 
-void user_interface::die(nullable<battle> the_battle, nullable<mobile_object> target_mob) const
+void user_interface::die(shared_ptr<battle> the_battle, shared_ptr<mobile_object> target_mob) const
 {
 	if (_level < output_level::low) return;
 	_ui_mutex->lock();
@@ -31,7 +32,7 @@ void user_interface::die(nullable<battle> the_battle, nullable<mobile_object> ta
 	_ui_mutex->unlock();
 }
 
-void user_interface::attack_misses(nullable<battle> the_battle, nullable<mobile_object> mob, const nullable<mobile_object> target_mob) const
+void user_interface::attack_misses(shared_ptr<battle> the_battle, shared_ptr<mobile_object> mob, const shared_ptr<mobile_object> target_mob) const
 {
 	if (_level < output_level::medium) return;
 	_ui_mutex->lock();
@@ -41,7 +42,7 @@ void user_interface::attack_misses(nullable<battle> the_battle, nullable<mobile_
 	_ui_mutex->unlock();
 }
 
-void user_interface::receive_damage(nullable<battle> the_battle, nullable<attack_results> results) const
+void user_interface::receive_damage(shared_ptr<battle> the_battle, shared_ptr<attack_results> results) const
 {
 	if (_level < output_level::medium) return;
 	_ui_mutex->lock();
@@ -58,7 +59,7 @@ void user_interface::receive_damage(nullable<battle> the_battle, nullable<attack
 }
 
 
-void user_interface::knock_out(nullable<battle> the_battle, nullable<mobile_object> target_mob) const
+void user_interface::knock_out(shared_ptr<battle> the_battle, shared_ptr<mobile_object> target_mob) const
 {
 	if (_level < output_level::high) return;
 	_ui_mutex->lock();
@@ -68,7 +69,7 @@ void user_interface::knock_out(nullable<battle> the_battle, nullable<mobile_obje
 	_ui_mutex->unlock();
 }
 
-void user_interface::process_attack(nullable<battle> the_battle, nullable<mobile_object> mob, int damage_roll, nullable<mobile_object> victim) const
+void user_interface::process_attack(shared_ptr<battle> the_battle, shared_ptr<mobile_object> mob, int damage_roll, shared_ptr<mobile_object> victim) const
 {
 	// currently uncalled
 	if (_level < output_level::high) return;
@@ -80,7 +81,7 @@ void user_interface::process_attack(nullable<battle> the_battle, nullable<mobile
 }
 
 
-void user_interface::round_ends(nullable<battle> the_battle, int turn_id) const
+void user_interface::round_ends(shared_ptr<battle> the_battle, int turn_id) const
 {
 	if (_level < output_level::max) return;
 	_ui_mutex->lock();
@@ -90,7 +91,7 @@ void user_interface::round_ends(nullable<battle> the_battle, int turn_id) const
 	_ui_mutex->unlock();
 }
 
-void user_interface::round_starts(nullable<battle> the_battle, int turn_id) const
+void user_interface::round_starts(shared_ptr<battle> the_battle, int turn_id) const
 {
 	if (_level < output_level::max) return;
 	_ui_mutex->lock();

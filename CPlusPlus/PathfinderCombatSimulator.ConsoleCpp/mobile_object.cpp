@@ -22,7 +22,7 @@ using namespace pathfinder_combat_simulator;
 	return id == contained.id;
 }
 
-[[nodiscard]] bool mobile_object::operator==(const nullable<mobile_object>& shared) const
+[[nodiscard]] bool mobile_object::operator==(const shared_ptr<mobile_object>& shared) const
 {
 	return id == shared->id;
 }

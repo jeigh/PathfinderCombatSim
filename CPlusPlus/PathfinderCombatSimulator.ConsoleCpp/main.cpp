@@ -15,7 +15,7 @@ class OrcNeckSplitterAttack : public attack
 public:
 	OrcNeckSplitterAttack()
 	{
-        nullable<die_roll> theDamageDice = make_shared<die_roll>();
+        shared_ptr<die_roll> theDamageDice = make_shared<die_roll>();
 
         theDamageDice->die_count = 1;
         theDamageDice->die_size = 8;
@@ -33,10 +33,10 @@ public:
 class combat_algorithm_tests 
 {
 public:
-	explicit combat_algorithm_tests(const nullable<combat_process>& combat_algorithm, int battle_id) : combatAlgorithm(combat_algorithm), battle_id_(battle_id) { }
+	explicit combat_algorithm_tests(const shared_ptr<combat_process>& combat_algorithm, int battle_id) : combatAlgorithm(combat_algorithm), battle_id_(battle_id) { }
 
 private:
-    nullable<combat_process> combatAlgorithm;
+    shared_ptr<combat_process> combatAlgorithm;
     int battle_id_;
 
 public:
@@ -59,7 +59,7 @@ public:
 		
         
 
-        vector<nullable<combat_team>> combatGroups; 
+        vector<shared_ptr<combat_team>> combatGroups;
         
         combatGroups.push_back(make_shared<combat_team>("Clan Foesmash", vector{ thaddeus, ugthar  }));
         combatGroups.push_back(make_shared<combat_team>("Clan Skullmugs", vector{ bloodfist, timmidides }));

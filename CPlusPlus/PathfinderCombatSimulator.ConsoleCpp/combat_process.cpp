@@ -7,22 +7,22 @@ using namespace pathfinder_combat_simulator;
 using std::make_shared;
 using std::logic_error;
 
-int combat_process::roll_initiative(nullable<mobile_object> const actor) const
+int combat_process::roll_initiative(shared_ptr<mobile_object> const actor) const
 {
 	return actor->perception_skill_check_modifier + _rng->roll(20);
 }
 
-bool combat_process::is_combat_still_active(vector<nullable<combat_team>> const combat_groups) const
+bool combat_process::is_combat_still_active(vector<shared_ptr<combat_team>> const combat_groups) const
 {
 	auto alive_count = 0;
-	for (nullable<combat_team> combat_group : combat_groups)
+	for (shared_ptr<combat_team> combat_group : combat_groups)
 	{
 		if (still_lives(combat_group)) alive_count++;
 	}
 	return (alive_count > 1);
 }
 
-nullable< unordered_map<damage_type, int>> combat_process::roll_damage(vector<damage_effect> const damage_effects) const
+shared_ptr< unordered_map<damage_type, int>> combat_process::roll_damage(vector<damage_effect> const damage_effects) const
 {
 	auto returnable = make_shared<unordered_map<damage_type, int>>();
 
@@ -40,12 +40,12 @@ nullable< unordered_map<damage_type, int>> combat_process::roll_damage(vector<da
 	return returnable;
 }
 
-[[nodiscard]] int combat_process::roll_to_hit(nullable<mobile_object> mob) const
+[[nodiscard]] int combat_process::roll_to_hit(shared_ptr<mobile_object> mob) const
 {
 	return _rng->roll(20) + mob->default_attack->attack_modifier_ - (mob->number_of_previous_attacks_made_this_turn * 5);
 }
 
-void combat_process::process_battle_until_only_one_team_is_concious(nullable<battle> the_battle)
+void combat_process::process_battle_until_only_one_team_is_concious(shared_ptr<battle> the_battle)
 {
 
 	int roundId = 1;
@@ -66,12 +66,12 @@ void combat_process::process_battle_until_only_one_team_is_concious(nullable<bat
 	}
 }
 
-[[nodiscard]] nullable<initiative_table> combat_process::roll_and_order_by_initiative(nullable<battle> the_battle) const
+[[nodiscard]] shared_ptr<initiative_table> combat_process::roll_and_order_by_initiative(shared_ptr<battle> the_battle) const
 {
 	auto table = make_shared<initiative_table>();
-	for (nullable<combat_team> const combat_team : the_battle->combat_teams)
+	for (shared_ptr<combat_team> const combat_team : the_battle->combat_teams)
 	{
-		for (nullable<mobile_object> const combatant : combat_team->combatants)
+		for (shared_ptr<mobile_object> const combatant : combat_team->combatants)
 		{
 			int roll_value = roll_initiative(combatant);
 			table->add_roll_by_mob(combatant, roll_value);
@@ -81,33 +81,33 @@ void combat_process::process_battle_until_only_one_team_is_concious(nullable<bat
 }
 
 
-bool combat_process::still_lives(nullable<combat_team> const acg) const
+bool combat_process::still_lives(shared_ptr<combat_team> const acg) const
 {
-	for (nullable<mobile_object> mob : acg->combatants)
+	for (shared_ptr<mobile_object> mob : acg->combatants)
 	{
 		if (!mob->is_dead()) return true;
 	}
 	return false;
 }
 
-nullable<int> combat_process::calculate_modified_ac(nullable<mobile_object> const victim) const
+shared_ptr<int> combat_process::calculate_modified_ac(shared_ptr<mobile_object> const victim) const
 {
-	nullable<int> modified_armor_class = make_shared<int>(victim->unmodified_current_armor_class);
+	shared_ptr<int> modified_armor_class = make_shared<int>(victim->unmodified_current_armor_class);
 
 	if (victim->is_unconcious()) *modified_armor_class -= 4;
 
 	return modified_armor_class;
 }
 
-nullable<attack_results> combat_process::attack(
-	nullable<mobile_object> const attacker,
-	nullable<mobile_object> const victim) const
+shared_ptr<attack_results> combat_process::attack(
+	shared_ptr<mobile_object> const attacker,
+	shared_ptr<mobile_object> const victim) const
 {
 	if (attacker->default_attack != nullptr)
 	{
 		const int attack_value = roll_to_hit(attacker);
 
-		nullable<int> modified_armor_class = calculate_modified_ac(victim);
+		shared_ptr<int> modified_armor_class = calculate_modified_ac(victim);
 
 		if (attack_value > *modified_armor_class)
 		{
@@ -136,14 +136,14 @@ nullable<attack_results> combat_process::attack(
 }
 
 void combat_process::process_action(
-	nullable<battle> the_battle,
+	shared_ptr<battle> the_battle,
 	int const action_number,
-	nullable<mobile_object> acting_mob) const
+	shared_ptr<mobile_object> acting_mob) const
 {
-	nullable<mobile_object> target_mob = _ai->get_target_for(acting_mob, the_battle->combat_teams);
+	shared_ptr<mobile_object> target_mob = _ai->get_target_for(acting_mob, the_battle->combat_teams);
 	if (target_mob != nullptr && !acting_mob->is_dead() && !acting_mob->is_unconcious())
 	{
-		nullable<mobile_object> victim = target_mob;
+		shared_ptr<mobile_object> victim = target_mob;
 		auto results = attack(acting_mob, victim);
 
 		if (results != nullptr && results->target_mob != nullptr)
@@ -169,7 +169,7 @@ void combat_process::process_action(
 	}
 }
 
-bool combat_process::has_available_action_this_turn(nullable<mobile_object> const mob) const
+bool combat_process::has_available_action_this_turn(shared_ptr<mobile_object> const mob) const
 {
 	//todo: correct this logic
 	return true;

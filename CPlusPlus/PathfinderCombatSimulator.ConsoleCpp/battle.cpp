@@ -17,7 +17,7 @@ using namespace pathfinder_combat_simulator;
 
 void battle::round_ends()
 {
-	for (nullable<mobile_object> mob : get_combatants())
+	for (shared_ptr<mobile_object> mob : get_combatants())
 	{
 		mob->number_of_previous_attacks_made_this_turn = 0;
 	}
