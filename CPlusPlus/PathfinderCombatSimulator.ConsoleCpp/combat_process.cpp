@@ -90,7 +90,7 @@ bool combat_process::still_lives(shared_ptr<combat_team> const acg) const
 	return false;
 }
 
-shared_ptr<int> combat_process::calculate_modified_ac(shared_ptr<mobile_object> const victim) const
+auto combat_process::calculate_modified_ac(shared_ptr<mobile_object> const victim) const -> shared_ptr<int>
 {
 	shared_ptr<int> modified_armor_class = make_shared<int>(victim->unmodified_current_armor_class);
 
@@ -99,13 +99,17 @@ shared_ptr<int> combat_process::calculate_modified_ac(shared_ptr<mobile_object> 
 	return modified_armor_class;
 }
 
-shared_ptr<attack_results> combat_process::attack(
+auto combat_process::attack(
+	shared_ptr<battle> the_battle,
 	shared_ptr<mobile_object> const attacker,
-	shared_ptr<mobile_object> const victim) const
+	shared_ptr<mobile_object> const victim) const -> shared_ptr<attack_results>
 {
 	if (attacker->default_attack != nullptr)
 	{
-		const int attack_value = roll_to_hit(attacker);
+
+		
+
+		int const attack_value = roll_to_hit(attacker);
 
 		shared_ptr<int> modified_armor_class = calculate_modified_ac(victim);
 
@@ -130,13 +134,29 @@ shared_ptr<attack_results> combat_process::attack(
 			//todo: apply saving throw feature?
 			return returnable;
 		}
+		
+		collect_data_payload(attacker, victim);
+
 		attacker->number_of_previous_attacks_made_this_turn += 1;
 	}
 	return nullptr;
 }
 
+void pathfinder_combat_simulator::combat_process::collect_data_payload(
+	const shared_ptr<mobile_object>& attacker, 
+	const shared_ptr<mobile_object>& victim) const
+{
+	auto addable = make_shared<data_collection_payload>();
+
+	addable->set_attacker(attacker);
+	addable->set_defender(victim);
+
+	addable->attackers_momentary_attack_bonus = attacker->default_attack->attack_modifier_;
+	addable->defenders_momentary_ac = *calculate_modified_ac(victim);
+}
+
 void combat_process::process_action(
-	shared_ptr<battle> the_battle,
+	shared_ptr<battle> const the_battle,
 	int const action_number,
 	shared_ptr<mobile_object> acting_mob) const
 {
@@ -144,7 +164,7 @@ void combat_process::process_action(
 	if (target_mob != nullptr && !acting_mob->is_dead() && !acting_mob->is_unconcious())
 	{
 		shared_ptr<mobile_object> victim = target_mob;
-		auto results = attack(acting_mob, victim);
+		auto results = attack(the_battle, acting_mob, victim);
 
 		if (results != nullptr && results->target_mob != nullptr)
 		{
