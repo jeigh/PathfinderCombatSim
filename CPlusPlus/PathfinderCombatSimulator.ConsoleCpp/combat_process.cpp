@@ -1,5 +1,7 @@
 #include <algorithm>
 
+
+
 #include "types.h"
 
 using namespace pathfinder_combat_simulator;
@@ -40,12 +42,12 @@ shared_ptr< unordered_map<damage_type, int>> combat_process::roll_damage(vector<
 	return returnable;
 }
 
-[[nodiscard]] int combat_process::roll_to_hit(shared_ptr<mobile_object> mob) const
+[[nodiscard]] int combat_process::apply_attack_modifiers(shared_ptr<mobile_object> mob, int d20) const
 {
-	return _rng->roll(20) + mob->default_attack->attack_modifier_ - (mob->number_of_previous_attacks_made_this_turn * 5);
+	return d20 + mob->default_attack->attack_modifier_ - (mob->number_of_previous_attacks_made_this_turn * 5);
 }
 
-void combat_process::process_battle_until_only_one_team_is_concious(shared_ptr<battle> the_battle)
+void combat_process::process_battle_until_only_one_team_is_concious(const shared_ptr<battle> the_battle)
 {
 
 	int roundId = 1;
@@ -102,14 +104,14 @@ auto combat_process::calculate_modified_ac(shared_ptr<mobile_object> const victi
 auto combat_process::attack(
 	shared_ptr<battle> the_battle,
 	shared_ptr<mobile_object> const attacker,
-	shared_ptr<mobile_object> const victim) const -> shared_ptr<attack_results>
+	shared_ptr<mobile_object> const victim)  -> shared_ptr<attack_results>
 {
 	if (attacker->default_attack != nullptr)
 	{
 
 		
-
-		int const attack_value = roll_to_hit(attacker);
+		int const unmodified_attack_roll = _rng->roll(20);
+		int const attack_value = apply_attack_modifiers(attacker, unmodified_attack_roll);
 
 		shared_ptr<int> modified_armor_class = calculate_modified_ac(victim);
 
@@ -135,7 +137,7 @@ auto combat_process::attack(
 			return returnable;
 		}
 		
-		collect_data_payload(attacker, victim);
+		collect_data_payload(attacker, victim, unmodified_attack_roll);
 
 		attacker->number_of_previous_attacks_made_this_turn += 1;
 	}
@@ -144,21 +146,27 @@ auto combat_process::attack(
 
 void pathfinder_combat_simulator::combat_process::collect_data_payload(
 	const shared_ptr<mobile_object>& attacker, 
-	const shared_ptr<mobile_object>& victim) const
+	const shared_ptr<mobile_object>& victim,
+	const int unmodified_attack_roll) 
 {
-	auto addable = make_shared<data_collection_payload>();
+	auto addable = std::make_unique<data_collection_payload>();
 
 	addable->set_attacker(attacker);
 	addable->set_defender(victim);
 
 	addable->attackers_momentary_attack_bonus = attacker->default_attack->attack_modifier_;
 	addable->defenders_momentary_ac = *calculate_modified_ac(victim);
+	addable->unmodified_attack_roll = unmodified_attack_roll;
+
+	auto dal = std::make_unique<data_access>();
+	
+	dal->insert_payload(std::move(addable));
 }
 
 void combat_process::process_action(
 	shared_ptr<battle> const the_battle,
 	int const action_number,
-	shared_ptr<mobile_object> acting_mob) const
+	shared_ptr<mobile_object> acting_mob) 
 {
 	shared_ptr<mobile_object> target_mob = _ai->get_target_for(acting_mob, the_battle->combat_teams);
 	if (target_mob != nullptr && !acting_mob->is_dead() && !acting_mob->is_unconcious())

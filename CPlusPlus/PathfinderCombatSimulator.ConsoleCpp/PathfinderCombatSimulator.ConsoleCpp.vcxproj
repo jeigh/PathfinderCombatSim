@@ -131,6 +131,7 @@
     <ClCompile Include="battle.cpp" />
     <ClCompile Include="combat_process.cpp" />
     <ClCompile Include="combat_team.cpp" />
+    <ClCompile Include="data_access.cpp" />
     <ClCompile Include="dice_manager.cpp" />
     <ClCompile Include="initiative_table.cpp" />
     <ClCompile Include="main.cpp" />

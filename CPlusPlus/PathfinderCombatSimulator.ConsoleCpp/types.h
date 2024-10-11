@@ -105,11 +105,17 @@ namespace pathfinder_combat_simulator
 		shared_ptr<mobile_object> defender = nullptr;
 
 	public:
+		//todo: some of these need to be populated 
+		int unmodified_attack_roll = 0;
 		int attackers_momentary_attack_bonus = 0;
 		int defenders_momentary_ac = 0;
 		int attakcer_number_of_attacks_made_this_turn = 0;
 		bool attack_successfully_hits = false;
 		bool attacker_wins_battle = false;
+		int attackers_weapons_minimum_crit = 0;
+		int attackers_weapons_crit_multipler = 0;
+		float predicted_damage_if_hit = 0;
+
 
 		void set_attacker(shared_ptr<mobile_object> attacker) { this->attacker = attacker; }
 		void set_defender(shared_ptr<mobile_object> defender) { this->defender = defender; }
@@ -214,6 +220,12 @@ namespace pathfinder_combat_simulator
 		vector<shared_ptr<initiative_entry>> raw;
 	};
 
+	class data_access 
+	{
+	public:
+		void insert_payload(unique_ptr<data_collection_payload> payload);
+	};
+
 	class combat_process
 	{
 	public:
@@ -224,7 +236,7 @@ namespace pathfinder_combat_simulator
 		[[nodiscard]] int roll_initiative(shared_ptr<mobile_object> const actor) const;
 		[[nodiscard]] bool is_combat_still_active(vector<shared_ptr<combat_team>> const combat_groups) const;
 		[[nodiscard]] shared_ptr<unordered_map<damage_type, int>> roll_damage(vector<damage_effect> const damage_effects) const;
-		[[nodiscard]] int roll_to_hit(shared_ptr<mobile_object> mob) const;
+		[[nodiscard]] int apply_attack_modifiers(shared_ptr<mobile_object> mob, int d20) const;
 
 		void process_battle_until_only_one_team_is_concious(const shared_ptr<battle>);
 
@@ -235,11 +247,12 @@ namespace pathfinder_combat_simulator
 
 		[[nodiscard]] bool still_lives(shared_ptr<combat_team> const acg) const;
 		[[nodiscard]] shared_ptr<int> calculate_modified_ac(shared_ptr<mobile_object> const victim) const;
-		[[nodiscard]] shared_ptr<attack_results> attack(shared_ptr<battle> the_battle, shared_ptr<mobile_object> const attacker, shared_ptr<mobile_object> const victim) const;
-		void collect_data_payload(const std::shared_ptr<pathfinder_combat_simulator::mobile_object>& attacker, const std::shared_ptr<pathfinder_combat_simulator::mobile_object>& victim) const;
+		[[nodiscard]] shared_ptr<attack_results> attack(shared_ptr<battle> the_battle, shared_ptr<mobile_object> const attacker, shared_ptr<mobile_object> const victim) ;
+		/*void collect_data_payload(const std::shared_ptr<pathfinder_combat_simulator::mobile_object>& attacker, const std::shared_ptr<pathfinder_combat_simulator::mobile_object>& victim) const;*/
+		void collect_data_payload(const std::shared_ptr<pathfinder_combat_simulator::mobile_object>& attacker, const std::shared_ptr<pathfinder_combat_simulator::mobile_object>& victim, const int unmodified_attack_roll) ;
 		[[nodiscard]] bool has_available_action_this_turn(shared_ptr<mobile_object> const mob) const;
 
-		void process_action(shared_ptr<battle> the_battle, int const action_number, shared_ptr<mobile_object> acting_mob) const;
+		void process_action(shared_ptr<battle> the_battle, int const action_number, shared_ptr<mobile_object> acting_mob) ;
 	};
 
 	class battle_results

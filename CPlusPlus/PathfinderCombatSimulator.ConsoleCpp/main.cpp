@@ -40,7 +40,7 @@ private:
     int battle_id_;
 
 public:
-	void run_test() const 
+	void run_test()  
 	{
         // brutes
         auto ugthar = make_shared<mobile_object>("Ugthar collector of toes", 30, 18, 0, make_shared<OrcNeckSplitterAttack>());
