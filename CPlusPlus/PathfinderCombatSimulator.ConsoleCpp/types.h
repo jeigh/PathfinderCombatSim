@@ -7,6 +7,9 @@
 #include <mutex>
 #include <shared_mutex>
 
+#include <Windows.h>
+#include <sql.h>
+#include <sqltypes.h>
 
 using std::vector;
 using std::unordered_map;
@@ -15,7 +18,7 @@ using std::unique_ptr;
 using std::tuple;
 using std::shared_ptr;
 
-namespace pathfinder_combat_simulator 
+namespace pathfinder_combat_simulator
 {
 
 	enum damage_type
@@ -88,7 +91,6 @@ namespace pathfinder_combat_simulator
 		[[nodiscard]] bool operator==(const shared_ptr<mobile_object>& shared) const;
 	};
 
-
 	class combat_team
 	{
 	public:
@@ -146,6 +148,13 @@ namespace pathfinder_combat_simulator
 		shared_ptr<mobile_object> attacking_mob;
 	};
 
+	enum class attack_outcome
+	{
+		hit_no_crit = 1,
+		miss = 2,
+		hit_and_crit = 3
+	};
+
 	enum class output_level
 	{
 		none = 0,
@@ -155,7 +164,6 @@ namespace pathfinder_combat_simulator
 		high = 4,
 		max = 5
 	};
-
 
 	class user_interface
 	{
@@ -182,9 +190,6 @@ namespace pathfinder_combat_simulator
 		int initiative_roll;
 	};
 
-
-
-
 	class mob_ai
 	{
 	public:
@@ -209,7 +214,6 @@ namespace pathfinder_combat_simulator
 		int initiative_roll = 0;
 	};
 
-
 	class initiative_table
 	{
 	public:
@@ -220,23 +224,98 @@ namespace pathfinder_combat_simulator
 		vector<shared_ptr<initiative_entry>> raw;
 	};
 
-	class data_access 
+	class attack_scenario
 	{
 	public:
-		void insert_payload(unique_ptr<data_collection_payload> payload);
+		
+		int attack_bonus;
+		int armor_class;
+		int minimum_crit;
+		int crit_multiplier;
+		int unmodified_attack_roll;
+		int damage_dice_count;
+		float mean_damage_per_die;
+		float expected_result;
+	};
+
+	class data_access
+	{
+
+	public:
+		explicit data_access(shared_ptr<std::shared_mutex> db_mutex) : _db_mutex(db_mutex) {
+			initialize_connection();
+		}
+		~data_access();
+		void initialize_connection();
+		void close_connection();
+
+		void insert_attack_scenario(shared_ptr<attack_scenario> scenario);
+	private:
+		shared_ptr<std::shared_mutex> _db_mutex;
+		SQLHENV hEnv = NULL;
+		SQLHDBC hDbc = NULL;
+	};
+
+	class damage_strategy {
+	public:
+		damage_strategy(int damage_dice_count, int damage_dice_size) : _damage_dice_count(damage_dice_count), _damage_dice_size(damage_dice_size) { }
+
+		virtual float get_damage_as_float() const = 0;
+		int get_damage_as_int() const;
+
+
+		int _damage_dice_count;
+		int _damage_dice_size;
+	};
+
+	class attack_abstraction
+	{
+	public:
+		attack_abstraction(shared_ptr<dice_manager> rng, shared_ptr<data_access> dal) : _rng(rng), _dal(dal) { }
+
+		float simulate_attack(
+			int attackers_attack_bonus,
+			int defenders_ac,
+			int attackers_weapons_minimum_crit,
+			int attackers_weapons_crit_multipler,
+			int unmodified_attack_roll,
+			shared_ptr<damage_strategy> dmg_strategy) const;
+	private:
+		shared_ptr<dice_manager> _rng;
+		shared_ptr<data_access> _dal;
+
+
+	};
+
+	class attack_process
+	{
+	public:
+		attack_process(shared_ptr<data_access> dal, shared_ptr<dice_manager> rng) : _dal(dal), _rng(rng) { }
+
+		[[nodiscard]] shared_ptr<attack_results> do_attack(shared_ptr<battle> the_battle, shared_ptr<mobile_object> const attacker, shared_ptr<mobile_object> const victim);
+		[[nodiscard]] int apply_attack_modifiers(shared_ptr<mobile_object> mob, int d20) const;
+		[[nodiscard]] shared_ptr<unordered_map<damage_type, int>> roll_damage(vector<damage_effect> const damage_effects) const;
+
+	private:
+		shared_ptr<dice_manager> _rng;
+		shared_ptr<data_access> _dal;
+
+		[[nodiscard]] shared_ptr<int> calculate_modified_ac(shared_ptr<mobile_object> const victim) const;
+		void collect_data_payload(const std::shared_ptr<pathfinder_combat_simulator::mobile_object>& attacker, const std::shared_ptr<pathfinder_combat_simulator::mobile_object>& victim, const int unmodified_attack_roll);
 	};
 
 	class combat_process
 	{
 	public:
-		combat_process(shared_ptr<dice_manager> rng, shared_ptr<user_interface> ui, shared_ptr<mob_ai> ai) :
-			_rng(rng), _ui(ui), _ai(ai) {}
-		
+		combat_process(shared_ptr<dice_manager> rng, shared_ptr<user_interface> ui, shared_ptr<mob_ai> ai, shared_ptr<data_access> dal) :
+			_rng(rng), _ui(ui), _ai(ai)
+		{
+			_attack_process = std::make_shared<attack_process>(dal, rng);
+		}
+
 		[[nodiscard]] shared_ptr<initiative_table> roll_and_order_by_initiative(shared_ptr<battle> the_battle) const;
 		[[nodiscard]] int roll_initiative(shared_ptr<mobile_object> const actor) const;
 		[[nodiscard]] bool is_combat_still_active(vector<shared_ptr<combat_team>> const combat_groups) const;
-		[[nodiscard]] shared_ptr<unordered_map<damage_type, int>> roll_damage(vector<damage_effect> const damage_effects) const;
-		[[nodiscard]] int apply_attack_modifiers(shared_ptr<mobile_object> mob, int d20) const;
 
 		void process_battle_until_only_one_team_is_concious(const shared_ptr<battle>);
 
@@ -244,15 +323,12 @@ namespace pathfinder_combat_simulator
 		shared_ptr<dice_manager> _rng;
 		shared_ptr<user_interface> _ui;
 		shared_ptr<mob_ai> _ai;
+		shared_ptr<attack_process> _attack_process;
 
 		[[nodiscard]] bool still_lives(shared_ptr<combat_team> const acg) const;
-		[[nodiscard]] shared_ptr<int> calculate_modified_ac(shared_ptr<mobile_object> const victim) const;
-		[[nodiscard]] shared_ptr<attack_results> attack(shared_ptr<battle> the_battle, shared_ptr<mobile_object> const attacker, shared_ptr<mobile_object> const victim) ;
-		/*void collect_data_payload(const std::shared_ptr<pathfinder_combat_simulator::mobile_object>& attacker, const std::shared_ptr<pathfinder_combat_simulator::mobile_object>& victim) const;*/
-		void collect_data_payload(const std::shared_ptr<pathfinder_combat_simulator::mobile_object>& attacker, const std::shared_ptr<pathfinder_combat_simulator::mobile_object>& victim, const int unmodified_attack_roll) ;
 		[[nodiscard]] bool has_available_action_this_turn(shared_ptr<mobile_object> const mob) const;
 
-		void process_action(shared_ptr<battle> the_battle, int const action_number, shared_ptr<mobile_object> acting_mob) ;
+		void process_action(shared_ptr<battle> the_battle, int const action_number, shared_ptr<mobile_object> acting_mob);
 	};
 
 	class battle_results
@@ -261,7 +337,18 @@ namespace pathfinder_combat_simulator
 		vector<combat_team> groups;
 	};
 
+	class statistical_mean_damage_strategy : public damage_strategy {
+	public:
+		statistical_mean_damage_strategy(int damage_dice_count, int damage_dice_size) : damage_strategy(damage_dice_count, damage_dice_size) { }
 
+		float get_damage_as_float() const;
+	};
 
+	class roll_dice_damage_strategy : public damage_strategy
+	{
+	public:
+		roll_dice_damage_strategy(int damage_dice_count, int damage_dice_size) : damage_strategy(damage_dice_count, damage_dice_size) { }
 
+		float get_damage_as_float() const;
+	};
 }

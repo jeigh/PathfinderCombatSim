@@ -45,6 +45,12 @@
     <ClCompile Include="data_access.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="attack_process.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="attack_abstraction.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="types.h">
