@@ -6,10 +6,7 @@
 #include <memory>
 #include <mutex>
 #include <shared_mutex>
-
-#include <Windows.h>
-#include <sql.h>
-#include <sqltypes.h>
+#include <fstream>
 
 using std::vector;
 using std::unordered_map;
@@ -249,11 +246,13 @@ namespace pathfinder_combat_simulator
 		void initialize_connection();
 		void close_connection();
 
+		void insert_attack_scenarios(vector<shared_ptr<attack_scenario>> scenarios);
 		void insert_attack_scenario(shared_ptr<attack_scenario> scenario);
 	private:
+		void repeatable_insert_logic(shared_ptr<attack_scenario> scenario);
+		std::string _attack_scenario_file_name = "attack_scenarios.csv";
+		std::ofstream _file;
 		shared_ptr<std::shared_mutex> _db_mutex;
-		SQLHENV hEnv = NULL;
-		SQLHDBC hDbc = NULL;
 	};
 
 	class damage_strategy {
