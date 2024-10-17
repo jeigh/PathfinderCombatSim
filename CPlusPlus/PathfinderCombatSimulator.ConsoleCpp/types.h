@@ -235,26 +235,6 @@ namespace pathfinder_combat_simulator
 		float expected_result;
 	};
 
-	class data_access
-	{
-
-	public:
-		explicit data_access(shared_ptr<std::shared_mutex> db_mutex) : _db_mutex(db_mutex) {
-			initialize_connection();
-		}
-		~data_access();
-		void initialize_connection();
-		void close_connection();
-
-		void insert_attack_scenarios(vector<shared_ptr<attack_scenario>> scenarios);
-		void insert_attack_scenario(shared_ptr<attack_scenario> scenario);
-	private:
-		void repeatable_insert_logic(shared_ptr<attack_scenario> scenario);
-		std::string _attack_scenario_file_name = "attack_scenarios.csv";
-		std::ofstream _file;
-		shared_ptr<std::shared_mutex> _db_mutex;
-	};
-
 	class damage_strategy {
 	public:
 		damage_strategy(int damage_dice_count, int damage_dice_size) : _damage_dice_count(damage_dice_count), _damage_dice_size(damage_dice_size) { }
@@ -267,23 +247,65 @@ namespace pathfinder_combat_simulator
 		int _damage_dice_size;
 	};
 
+	class damage_request {
+	public:
+		damage_request(attack_outcome this_attack_outcome, int crit_multiplier, shared_ptr<damage_strategy> dmg_strategy) :
+			this_attack_outcome(this_attack_outcome), crit_multiplier(crit_multiplier), dmg_strategy(dmg_strategy) { }
+
+		attack_outcome this_attack_outcome;
+		int crit_multiplier;
+		
+		shared_ptr<damage_strategy> dmg_strategy;
+	};
+
+	class attack_request {
+	public:
+		attack_request(int unmodified_attack_roll, int attack_bonus, int minimum_crit, int armor_class) : 
+			unmodified_attack_roll(unmodified_attack_roll), attack_bonus(attack_bonus), minimum_crit(minimum_crit), armor_class(armor_class) { }
+
+		int unmodified_attack_roll;
+		int attack_bonus;
+		int minimum_crit;
+		int armor_class;
+	};
+
+	class data_access
+	{
+
+	public:
+		explicit data_access(shared_ptr<std::shared_mutex> db_mutex) : _db_mutex(db_mutex) {}
+		~data_access()
+		{
+			if (_attackfile.is_open()) _attackfile.close();
+			if (_damagefile.is_open()) _damagefile.close();
+		}
+
+		void persist_attack_results(shared_ptr<attack_request> request, attack_outcome outcome);
+		void persist_damage_results(int damage_dice_count, float statistical_damage_mean, shared_ptr<damage_request> request, float expected_result);
+
+	private:
+		std::string _attack_scenario_file_name = "attack_scenarios.csv";
+		std::string _damage_scenario_file_name = "damage_scenarios.csv";
+
+		std::ofstream _attackfile;
+		std::ofstream _damagefile;
+
+		shared_ptr<std::shared_mutex> _db_mutex;
+	};
+
 	class attack_abstraction
 	{
 	public:
 		attack_abstraction(shared_ptr<dice_manager> rng, shared_ptr<data_access> dal) : _rng(rng), _dal(dal) { }
 
-		float simulate_attack(
-			int attackers_attack_bonus,
-			int defenders_ac,
-			int attackers_weapons_minimum_crit,
-			int attackers_weapons_crit_multipler,
-			int unmodified_attack_roll,
-			shared_ptr<damage_strategy> dmg_strategy) const;
+		attack_outcome get_attack_outcome(shared_ptr<attack_request> request);
+		float get_damage_outcome(shared_ptr<damage_request> request);
 	private:
+		attack_outcome get_attack_outcome(int unmodified_attack_roll, int attackers_attack_bonus, int attackers_weapons_minimum_crit, int defenders_ac);
+		float get_damage_outcome(attack_outcome the_attack_outcome, int attackers_weapons_crit_multiplier,  shared_ptr<damage_strategy> dmg_strategy);
+
 		shared_ptr<dice_manager> _rng;
 		shared_ptr<data_access> _dal;
-
-
 	};
 
 	class attack_process

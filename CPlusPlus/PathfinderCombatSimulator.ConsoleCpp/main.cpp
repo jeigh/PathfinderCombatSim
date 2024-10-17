@@ -79,7 +79,7 @@ public:
     }
 
     // the attack bonus of the attacker
-    vector<int> attack_bonuses = vector<int>{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+    vector<int> attack_bonuses = vector<int>{ -10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
     
     // the armor class of the target
     vector<int> armor_classes = vector<int>();
@@ -97,16 +97,23 @@ public:
 	vector<float> mean_damages = vector<float>         { 2.0f,  2.5f,  3.5f,  4.5f,  5.5f,   6.5f,   10.5f };
     
     // how many damage dice to roll
-	vector<int> damage_dice_count = vector<int>{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };   
+	vector<int> damage_dice_count = vector<int>{ 1, 2 };   
     
     // the die role for the attack
     vector<int> unmodified_attack_rolls = vector<int>{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 };
 
+    // the attack outcome
+	vector<attack_outcome> attack_outcomes = vector<attack_outcome>{ attack_outcome::hit_and_crit, attack_outcome::hit_no_crit, attack_outcome::miss };
+
     //todo: add strength mod for damage purposes
+	vector<int> strength_modifiers = vector<int>{ -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5 };
 };
 
 
-int main() 
+void GenerateDamagesForRanges(ranges& input_ranges, std::shared_ptr<pathfinder_combat_simulator::attack_abstraction> atk, std::shared_ptr<pathfinder_combat_simulator::data_access> dal);
+void GenerateAttacksForRanges(ranges& input_ranges, std::shared_ptr<pathfinder_combat_simulator::attack_abstraction> atk, std::shared_ptr<pathfinder_combat_simulator::data_access> dal);
+
+int main()
 {
     auto run_single_threaded = true;
     auto seed = time(nullptr);
@@ -115,59 +122,80 @@ int main()
 
     cout << "Hit a key to begin...\n";
 
-	if (!getchar()) return 0;
+    if (!getchar()) return 0;
 
     //original_combat_stuff(run_single_threaded);
 
-	
-	auto rng = make_shared<dice_manager>();
+    auto rng = make_shared<dice_manager>();
     auto dal = make_shared<data_access>(make_shared<std::shared_mutex>());
-
-    
-    auto theAttackProcess = make_shared<attack_abstraction>(rng, dal);
-
+    auto atk = make_shared<attack_abstraction>(rng, dal);
     vector<shared_ptr<attack_scenario>> scenarios;
-    
+
     // there may be a better way of doing this without using nesting.
     auto input_ranges = ranges();
-
-	for (int attack_bonus : input_ranges.attack_bonuses) 
-    {
-		for (int armor_class : input_ranges.armor_classes) 
-        {
-			for (int minimum_crit : input_ranges.minimum_crits) 
-            {
-				for (int crit_multiplier : input_ranges.crit_multipliers) 
-                {
-                    for (int unmodified_attack_roll : input_ranges.unmodified_attack_rolls)
-                    {
-                        for (int damage_dice_count : input_ranges.damage_dice_count)
-                        {
-                            for (float statistical_damage_mean : input_ranges.mean_damages)
-                            {
-								auto damage_strategy = make_shared<statistical_mean_damage_strategy>(damage_dice_count, statistical_damage_mean);
-                                auto expected_result = theAttackProcess->simulate_attack(attack_bonus, armor_class, minimum_crit, crit_multiplier, unmodified_attack_roll, damage_strategy);
-                                auto new_scenario = std::make_shared<attack_scenario>(attack_bonus, armor_class, minimum_crit, crit_multiplier, unmodified_attack_roll, damage_dice_count, statistical_damage_mean, expected_result);
-                                scenarios.push_back(std::move(new_scenario));
-                            }
-                        }
-                    }
-				}
-			}
-		}
-    }
     
-	cout << "Inserting " << scenarios.size() << " scenarios\n";
-
-	for (auto insertable : scenarios)
-	{
-        dal->insert_attack_scenario(insertable);
-    }
-
-    cout << "yeah\n";
+    GenerateAttacksForRanges(input_ranges, atk, dal);
+    GenerateDamagesForRanges(input_ranges, atk, dal);
 }
 
+void GenerateAttacksForRanges(ranges& input_ranges, std::shared_ptr<pathfinder_combat_simulator::attack_abstraction> atk, std::shared_ptr<pathfinder_combat_simulator::data_access> dal)
+{
+    // attack loop
+    int ai = 0;
+    for (int attack_bonus : input_ranges.attack_bonuses)
+    {
+        for (int armor_class : input_ranges.armor_classes)
+        {
+            for (int minimum_crit : input_ranges.minimum_crits)
+            {
+                for (int unmodified_attack_roll : input_ranges.unmodified_attack_rolls)
+                {
+                    for (float statistical_damage_mean : input_ranges.mean_damages)
+                    {
+                        float returnable = 0.0f;
 
+                        auto attack_req = make_shared<attack_request>(unmodified_attack_roll, attack_bonus, minimum_crit, armor_class);
+                        auto this_attack_outcome = atk->get_attack_outcome(attack_req);
+
+                        dal->persist_attack_results(attack_req, this_attack_outcome);
+                        ai++;
+                    }
+                }
+            }
+        }
+    }
+
+    cout << ai << " Attacks calculated" << std::endl;
+}
+
+void GenerateDamagesForRanges(ranges& input_ranges, std::shared_ptr<pathfinder_combat_simulator::attack_abstraction> atk, std::shared_ptr<pathfinder_combat_simulator::data_access> dal)
+{
+    // damage loop
+    int di = 0;
+    for (auto this_attack_outcome : input_ranges.attack_outcomes)
+    {
+        for (int armor_class : input_ranges.armor_classes)
+        {
+            for (int crit_multiplier : input_ranges.crit_multipliers)
+            {
+                for (int damage_dice_count : input_ranges.damage_dice_count)
+                {
+                    for (float statistical_damage_mean : input_ranges.mean_damages)
+                    {
+                        auto dmg_strategy = make_shared<statistical_mean_damage_strategy>(damage_dice_count, statistical_damage_mean);
+                        auto dmg_req = make_shared<damage_request>(this_attack_outcome, crit_multiplier, dmg_strategy);
+                        auto expected_result = atk->get_damage_outcome(dmg_req);
+
+                        dal->persist_damage_results(damage_dice_count, statistical_damage_mean, dmg_req, expected_result);
+                        di++;
+                    }
+                }
+            }
+        }
+    }
+
+    cout << di << " Damages calculated" << std::endl;
+}
 
 auto original_combat_stuff(bool run_single_threaded) 
 {

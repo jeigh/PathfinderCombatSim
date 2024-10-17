@@ -5,55 +5,41 @@
 
 using namespace pathfinder_combat_simulator;
 
-data_access::~data_access() 
+void data_access::persist_attack_results(shared_ptr<attack_request> request, attack_outcome outcome)
 {
-	close_connection();
+	//_db_mutex->lock();
+
+	if (!_attackfile.is_open()) 
+		_attackfile.open(this->_attack_scenario_file_name, std::ios::app);
+
+	_attackfile 
+		<< request->attack_bonus << ","
+		<< request->armor_class << ","
+		<< request->minimum_crit << ","
+		<< request->unmodified_attack_roll << ","
+		<< static_cast<int>(outcome) 
+		<< std::endl;
+
+	//_db_mutex->unlock();
+
 }
 
-void data_access::initialize_connection() 
+void data_access::persist_damage_results(int damage_dice_count, float statistical_damage_mean, shared_ptr<damage_request> request, float expected_result)
 {
-	if (!_file.is_open())
-	_file.open(this->_attack_scenario_file_name, std::ios::app);
+	//_db_mutex->lock();
+
+	if (!_damagefile.is_open()) 
+		_damagefile.open(this->_damage_scenario_file_name, std::ios::app);
+
+	_damagefile
+		<< static_cast<int>(request->this_attack_outcome) << ","
+		<< damage_dice_count << ","
+		<< statistical_damage_mean << ","
+		<< request->crit_multiplier << ","
+		<< expected_result
+		<< std::endl;
+
+	//_db_mutex->unlock();
 }
 
-void data_access::close_connection() 
-{
-	if (_file.is_open()) _file.close();
-}
 
-
-void data_access::insert_attack_scenarios(vector<shared_ptr<attack_scenario>> scenarios)
-{
-	_db_mutex->lock();
-
-	if (_file.is_open())
-	{
-		for (auto scenario : scenarios)
-		{
-			repeatable_insert_logic(scenario);
-		}
-	}
-
-	_db_mutex->unlock();
-}
-
-void data_access::repeatable_insert_logic(shared_ptr<attack_scenario> scenario)
-{
-	_file << scenario->attack_bonus << ","
-		<< scenario->armor_class << ","
-		<< scenario->minimum_crit << ","
-		<< scenario->crit_multiplier << ","
-		<< scenario->unmodified_attack_roll << ","
-		<< scenario->damage_dice_count << ","
-		<< scenario->mean_damage_per_die << ","
-		<< scenario->expected_result << "\n";
-}
-
-void data_access::insert_attack_scenario(shared_ptr<attack_scenario> scenario) {
-	_db_mutex->lock();
-
-	if (_file.is_open()) 
-		repeatable_insert_logic(scenario);
-
-	_db_mutex->unlock();
-}
