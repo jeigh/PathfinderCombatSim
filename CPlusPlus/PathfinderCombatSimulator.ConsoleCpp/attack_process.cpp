@@ -18,20 +18,44 @@ auto attack_process::do_attack(
 {
 	if (attacker->default_attack != nullptr)
 	{
-		int const unmodified_attack_roll = _rng->roll(20);
-		int const attack_value = apply_attack_modifiers(attacker, unmodified_attack_roll);
+		int unmodified_attack_roll = _rng->roll(20);
+		int attack_value = apply_attack_modifiers(attacker, unmodified_attack_roll);
 
 		shared_ptr<int> modified_armor_class = calculate_modified_ac(victim);
+		int m_ac = *modified_armor_class;
+		auto minimum_crit = attacker->default_attack->minimum_crit_;
+		auto second_parameter = attack_value - unmodified_attack_roll;
+		
+		auto atk_request = make_shared<attack_request>(unmodified_attack_roll, second_parameter, minimum_crit, m_ac);
+		
+		auto attack_outcome = _attack_abstraction->get_attack_outcome(atk_request);
 
-		if (attack_value > *modified_armor_class)
+		if (attack_outcome != attack_outcome::miss)
 		{
 			auto returnable = make_shared<attack_results>();
-			auto damage_roll = roll_damage(attacker->default_attack->damage_effects_);
+			auto default_attack = attacker->default_attack;
+			auto damage_effects = default_attack->damage_effects_;
+			auto physical_damage_effect = *std::find_if(damage_effects.begin(), damage_effects.end(), [](damage_effect const& de) { return de._damage_type == damage_type::physical; });
+			auto dice = physical_damage_effect.damage_dice[0];
+			
+			int dice_count = 0;
+			int dice_size = 0;
+
+			if (dice != nullptr) {
+				dice_count = dice->die_count;
+				dice_size = dice->die_size;
+			}
+
+			auto crit_multiplier = 2;
+			auto the_damage_strategy = make_shared<roll_dice_damage_strategy>(_rng, dice_count, dice_size);
+
+			auto damageRequest = make_shared<damage_request>(attack_outcome, crit_multiplier, the_damage_strategy);
+			auto physical_damage = _attack_abstraction->get_damage_outcome(damageRequest);
 
 			//todo: update to work with more than just physical damage...
-			if (damage_roll->at(physical))
+			if (physical_damage > 0)
 			{
-				auto damage = damage_roll->at(physical);
+				auto damage = physical_damage;
 
 				if (returnable != nullptr)
 				{
@@ -52,23 +76,23 @@ auto attack_process::do_attack(
 	return nullptr;
 }
 
-shared_ptr< unordered_map<damage_type, int>> attack_process::roll_damage(vector<damage_effect> const damage_effects) const
-{
-	auto returnable = make_shared<unordered_map<damage_type, int>>();
-
-	for (damage_effect damage_effect : damage_effects)
-	{
-		int amount_to_add = _rng->add_rolls(damage_effect.damage_dice);
-		damage_type key = damage_effect._damage_type;
-
-		if (returnable->contains(damage_effect._damage_type))
-			returnable->insert_or_assign(key, returnable->at(key) + amount_to_add);
-		else
-			returnable->insert({ key, amount_to_add });
-	}
-
-	return returnable;
-}
+//shared_ptr< unordered_map<damage_type, int>> attack_process::roll_damage(vector<damage_effect> const damage_effects) const
+//{
+//	auto returnable = make_shared<unordered_map<damage_type, int>>();
+//
+//	for (damage_effect damage_effect : damage_effects)
+//	{
+//		int amount_to_add = _rng->add_rolls(damage_effect.damage_dice);
+//		damage_type key = damage_effect._damage_type;
+//
+//		if (returnable->contains(damage_effect._damage_type))
+//			returnable->insert_or_assign(key, returnable->at(key) + amount_to_add);
+//		else
+//			returnable->insert({ key, amount_to_add });
+//	}
+//
+//	return returnable;
+//}
 
 [[nodiscard]] int attack_process::apply_attack_modifiers(shared_ptr<mobile_object> mob, int d20) const
 {

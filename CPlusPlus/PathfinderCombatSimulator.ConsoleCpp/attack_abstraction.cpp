@@ -50,22 +50,6 @@ float attack_abstraction::get_damage_outcome(attack_outcome the_attack_outcome, 
 
 }
 
-//float attack_abstraction::simulate_attack(
-//	int attackers_attack_bonus,
-//	int defenders_ac,
-//	int attackers_weapons_minimum_crit,
-//	int attackers_weapons_crit_multipler,
-//	int unmodified_attack_roll,
-//	shared_ptr<damage_strategy> dmg_strategy) const 
-//{
-//	float returnable = 0.0f;
-//
-//	auto this_attack_outcome = get_attack_outcome(unmodified_attack_roll, attackers_attack_bonus, attackers_weapons_minimum_crit, defenders_ac);
-//	returnable = get_damage_outcome(this_attack_outcome, attackers_weapons_crit_multipler, unmodified_attack_roll, dmg_strategy);
-//	
-//	return returnable;
-//}
-
 float statistical_mean_damage_strategy::get_damage_as_float() const 
 {
 	auto returnable = 0.5 * _damage_dice_size + 0.5;
@@ -73,8 +57,13 @@ float statistical_mean_damage_strategy::get_damage_as_float() const
 }
 
 float roll_dice_damage_strategy::get_damage_as_float() const {
-	//todo: implement dice roll
-	return 0.0f;
+	float returnable = 0.0f;
+
+	for (int i = 0; i < _damage_dice_count; i++)
+	{
+		returnable += _rng->roll(_damage_dice_size);
+	}
+	return returnable;
 }
 
 int damage_strategy::get_damage_as_int() const {

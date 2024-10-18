@@ -112,6 +112,7 @@ public:
 
 void GenerateDamagesForRanges(ranges& input_ranges, std::shared_ptr<pathfinder_combat_simulator::attack_abstraction> atk, std::shared_ptr<pathfinder_combat_simulator::data_access> dal);
 void GenerateAttacksForRanges(ranges& input_ranges, std::shared_ptr<pathfinder_combat_simulator::attack_abstraction> atk, std::shared_ptr<pathfinder_combat_simulator::data_access> dal);
+void original_combat_stuff(shared_ptr<dice_manager> diceManager, shared_ptr<data_access> dal, shared_ptr<attack_abstraction> atk, bool run_single_threaded);
 
 int main()
 {
@@ -124,18 +125,20 @@ int main()
 
     if (!getchar()) return 0;
 
-    //original_combat_stuff(run_single_threaded);
-
     auto rng = make_shared<dice_manager>();
     auto dal = make_shared<data_access>(make_shared<std::shared_mutex>());
+
     auto atk = make_shared<attack_abstraction>(rng, dal);
-    vector<shared_ptr<attack_scenario>> scenarios;
+
+    original_combat_stuff(rng, dal, atk, run_single_threaded);
+	
+
 
     // there may be a better way of doing this without using nesting.
-    auto input_ranges = ranges();
+    //auto input_ranges = ranges();
     
-    GenerateAttacksForRanges(input_ranges, atk, dal);
-    GenerateDamagesForRanges(input_ranges, atk, dal);
+    //GenerateAttacksForRanges(input_ranges, atk, dal);
+    //GenerateDamagesForRanges(input_ranges, atk, dal);
 }
 
 void GenerateAttacksForRanges(ranges& input_ranges, std::shared_ptr<pathfinder_combat_simulator::attack_abstraction> atk, std::shared_ptr<pathfinder_combat_simulator::data_access> dal)
@@ -197,15 +200,17 @@ void GenerateDamagesForRanges(ranges& input_ranges, std::shared_ptr<pathfinder_c
     cout << di << " Damages calculated" << std::endl;
 }
 
-auto original_combat_stuff(bool run_single_threaded) 
+
+
+void original_combat_stuff(shared_ptr<dice_manager> diceManager, shared_ptr<data_access> dal, shared_ptr<attack_abstraction> atk, bool run_single_threaded)
 {
-    auto diceManager = make_shared<dice_manager>();
+    
     auto ui_mutex = std::make_shared<std::shared_mutex>();
     auto userInterface = make_shared<user_interface>(ui_mutex, output_level::low);
     auto mobAi = make_shared <mob_ai>();
     auto db_mutex = std::make_shared<std::shared_mutex>();
-    auto dal = make_shared<data_access>(db_mutex);
-    auto combatAlgorithm = make_shared<combat_process>(diceManager, userInterface, mobAi, dal);
+	auto attackProcess = make_shared<attack_process>(dal, diceManager, atk);
+    auto combatAlgorithm = make_shared<combat_process>(diceManager, userInterface, mobAi, attackProcess);
 
     if (!run_single_threaded) {
         vector<std::shared_ptr<std::thread>> the_threads;
