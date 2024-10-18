@@ -128,11 +128,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="attack_process.cpp" />
     <ClCompile Include="battle.cpp" />
     <ClCompile Include="combat_process.cpp" />
     <ClCompile Include="combat_team.cpp" />
+    <ClCompile Include="data_access.cpp" />
     <ClCompile Include="dice_manager.cpp" />
     <ClCompile Include="initiative_table.cpp" />
+    <ClCompile Include="attack_abstraction.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mobile_object.cpp" />
     <ClCompile Include="mob_ai.cpp" />
