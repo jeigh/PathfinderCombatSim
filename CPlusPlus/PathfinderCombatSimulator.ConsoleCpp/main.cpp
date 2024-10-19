@@ -19,7 +19,7 @@ public:
 
         theDamageDice->die_count = 1;
         theDamageDice->die_size = 8;
-        theDamageDice->modifer_after_addition = 4;
+        theDamageDice->modifer_after_addition = 2;
 
 		auto theDamageEffect = make_shared<damage_effect>();
         vector vector_of_damage_dice = { theDamageDice };
@@ -43,21 +43,21 @@ public:
 	void run_test()  
 	{
         // brutes
-        auto ugthar = make_shared<mobile_object>("Ugthar collector of toes", 30, 18, 0, make_shared<OrcNeckSplitterAttack>());
-        auto bloodfist = make_shared<mobile_object>("Bloodfist the cannibal", 30, 18, 0, make_shared<OrcNeckSplitterAttack>());
+        auto ugthar = make_shared<mobile_object>("Ugthar collector of toes", 30, 18, 0, 3, make_shared<OrcNeckSplitterAttack>());
+        auto bloodfist = make_shared<mobile_object>("Bloodfist the cannibal", 30, 18, 0, 3, make_shared<OrcNeckSplitterAttack>());
 
 		// warriors
-        auto thaddeus = make_shared<mobile_object>("Thaddeus the Angry", 23, 18, 0, make_shared<OrcNeckSplitterAttack>());
-        auto diosthenes = make_shared<mobile_object>("Diosthenes the Pensive", 23, 18, 0, make_shared<OrcNeckSplitterAttack>());
+        auto thaddeus = make_shared<mobile_object>("Thaddeus the Angry", 23, 18, 0, 2, make_shared<OrcNeckSplitterAttack>());
+        auto diosthenes = make_shared<mobile_object>("Diosthenes the Pensive", 23, 18, 0, 0, make_shared<OrcNeckSplitterAttack>());
 
         // cowards
-        auto timmidides = make_shared<mobile_object>("Timmidides the coward", 11, 18, 0, make_shared<OrcNeckSplitterAttack>());
-        auto squeaks = make_shared<mobile_object>("Squeaks", 10, 18, 0, make_shared<OrcNeckSplitterAttack>());      
+        auto timmidides = make_shared<mobile_object>("Timmidides the coward", 11, 18, 0, -1, make_shared<OrcNeckSplitterAttack>());
+        auto squeaks = make_shared<mobile_object>("Squeaks", 10, 18, 0, -2, make_shared<OrcNeckSplitterAttack>());      
 
         vector<shared_ptr<combat_team>> combatGroups;
         
-        combatGroups.push_back(make_shared<combat_team>("Clan Foesmash", vector{ thaddeus, ugthar  }));
-        combatGroups.push_back(make_shared<combat_team>("Clan Skullmugs", vector{ bloodfist, timmidides }));
+        combatGroups.push_back(make_shared<combat_team>("Clan Foesmash", vector{ thaddeus, ugthar, squeaks  }));
+        combatGroups.push_back(make_shared<combat_team>("Clan Skullmugs", vector{ bloodfist, timmidides, diosthenes }));
 
         // enable when multiple groups work
         //combatGroups.push_back(make_shared<combat_team>("Clan Femurclub", vector{ diosthenes, squeaks }));
@@ -76,6 +76,9 @@ public:
     {
         for (int i = 0; i <= 80; i++)
             armor_classes.push_back(i);
+
+        for (int i=-70; i<=70; i++)
+			attack_minus_ac.push_back(i);
     }
 
     // the attack bonus of the attacker
@@ -85,10 +88,10 @@ public:
     vector<int> armor_classes = vector<int>();
     
     // the die role needed to crit
-    vector<int> minimum_crits = vector<int>{ 18, 19, 20 };
+    vector<int> minimum_crits = vector<int>{  20 };
     
     // the multiplier applied when crit occurs
-    vector<int> crit_multipliers = vector<int>{ 1, 2, 3 };
+    vector<int> crit_multipliers = vector<int>{ 2 };
     
     // the string representing the damage dice
     vector<string> damage_dice_options = vector<string>{ "1d3", "1d4", "1d6", "1d8", "1d10", "1d12", "1d20" };
@@ -105,8 +108,10 @@ public:
     // the attack outcome
 	vector<attack_outcome> attack_outcomes = vector<attack_outcome>{ attack_outcome::hit_and_crit, attack_outcome::hit_no_crit, attack_outcome::miss };
 
-    //todo: add strength mod for damage purposes
-	vector<int> strength_modifiers = vector<int>{ -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5 };
+    
+	vector<int> attribute_modifiers = vector<int>{ -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5 };
+
+    vector<int> attack_minus_ac = vector<int>{ -10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 };
 };
 
 
@@ -133,10 +138,8 @@ int main()
     original_combat_stuff(rng, dal, atk, run_single_threaded);
 	
 
-
-    // there may be a better way of doing this without using nesting.
     //auto input_ranges = ranges();
-    
+    //
     //GenerateAttacksForRanges(input_ranges, atk, dal);
     //GenerateDamagesForRanges(input_ranges, atk, dal);
 }
@@ -145,28 +148,43 @@ void GenerateAttacksForRanges(ranges& input_ranges, std::shared_ptr<pathfinder_c
 {
     // attack loop
     int ai = 0;
-    for (int attack_bonus : input_ranges.attack_bonuses)
+	int num_of_rows = 
+        input_ranges.attribute_modifiers.size() * 
+        input_ranges.unmodified_attack_rolls.size() * 
+        input_ranges.attack_bonuses.size() * 
+        input_ranges.armor_classes.size() * 
+        input_ranges.minimum_crits.size() * 
+        input_ranges.unmodified_attack_rolls.size();
+
+	cout << "Generating " << num_of_rows << " attacks" << std::endl;
+    
+    for (int attribute_modifier : input_ranges.attribute_modifiers) 
     {
-        for (int armor_class : input_ranges.armor_classes)
+        for (int confirmation_roll : input_ranges.unmodified_attack_rolls)
         {
-            for (int minimum_crit : input_ranges.minimum_crits)
+            for (int attack_bonus : input_ranges.attack_bonuses)
             {
-                for (int unmodified_attack_roll : input_ranges.unmodified_attack_rolls)
+                for (int armor_class : input_ranges.armor_classes)
                 {
-                    for (float statistical_damage_mean : input_ranges.mean_damages)
+                    for (int minimum_crit : input_ranges.minimum_crits)
                     {
-                        float returnable = 0.0f;
+                        for (int unmodified_attack_roll : input_ranges.unmodified_attack_rolls)
+                        {
+                            float returnable = 0.0f;
 
-                        auto attack_req = make_shared<attack_request>(unmodified_attack_roll, attack_bonus, minimum_crit, armor_class);
-                        auto this_attack_outcome = atk->get_attack_outcome(attack_req);
+                            auto attack_req = make_shared<attack_request>(unmodified_attack_roll, attack_bonus, minimum_crit, armor_class, confirmation_roll, attribute_modifier);
+                            auto this_attack_outcome = atk->get_attack_outcome(attack_req);
 
-                        dal->persist_attack_results(attack_req, this_attack_outcome);
-                        ai++;
+                            dal->persist_attack_results(attack_req, this_attack_outcome);
+                            ai++;
+                        }
                     }
                 }
             }
         }
     }
+
+    
 
     cout << ai << " Attacks calculated" << std::endl;
 }
@@ -175,28 +193,31 @@ void GenerateDamagesForRanges(ranges& input_ranges, std::shared_ptr<pathfinder_c
 {
     // damage loop
     int di = 0;
-    for (auto this_attack_outcome : input_ranges.attack_outcomes)
-    {
-        for (int armor_class : input_ranges.armor_classes)
-        {
-            for (int crit_multiplier : input_ranges.crit_multipliers)
-            {
-                for (int damage_dice_count : input_ranges.damage_dice_count)
-                {
-                    for (float statistical_damage_mean : input_ranges.mean_damages)
-                    {
-                        auto dmg_strategy = make_shared<statistical_mean_damage_strategy>(damage_dice_count, statistical_damage_mean);
-                        auto dmg_req = make_shared<damage_request>(this_attack_outcome, crit_multiplier, dmg_strategy);
-                        auto expected_result = atk->get_damage_outcome(dmg_req);
 
-                        dal->persist_damage_results(damage_dice_count, statistical_damage_mean, dmg_req, expected_result);
-                        di++;
+    for (int attribute_modifier : input_ranges.attribute_modifiers)
+    {
+        for (auto this_attack_outcome : input_ranges.attack_outcomes)
+        {
+            for (int armor_class : input_ranges.armor_classes)
+            {
+                for (int crit_multiplier : input_ranges.crit_multipliers)
+                {
+                    for (int damage_dice_count : input_ranges.damage_dice_count)
+                    {
+                        for (float statistical_damage_mean : input_ranges.mean_damages)
+                        {
+                            auto dmg_strategy = make_shared<statistical_mean_damage_strategy>(damage_dice_count, statistical_damage_mean);
+                            auto dmg_req = make_shared<damage_request>(this_attack_outcome, crit_multiplier, dmg_strategy, attribute_modifier);
+                            auto expected_result = atk->get_damage_outcome(dmg_req);
+
+                            dal->persist_damage_results(damage_dice_count, statistical_damage_mean, dmg_req, expected_result);
+                            di++;
+                        }
                     }
                 }
             }
         }
-    }
-
+	}
     cout << di << " Damages calculated" << std::endl;
 }
 

@@ -61,6 +61,7 @@ namespace pathfinder_combat_simulator
 			const int unbuffed_max_hit_points,
 			const int unmodified_current_armor_class,
 			const int perception_skill_check_modifier,
+			const int current_str_modifier,
 			shared_ptr<attack> default_attack)
 			:
 			id(std::move(id)),
@@ -68,10 +69,12 @@ namespace pathfinder_combat_simulator
 			unbuffed_max_hit_points(unbuffed_max_hit_points),
 			unmodified_current_armor_class(unmodified_current_armor_class),
 			perception_skill_check_modifier(perception_skill_check_modifier),
+			current_str_modifier(current_str_modifier),
 			default_attack(default_attack) { }
 
 		string id;
 		int current_hit_points = 0;
+		int current_str_modifier = 0;
 		int unbuffed_max_hit_points = 0;
 		int unmodified_current_armor_class = 0;
 		int perception_skill_check_modifier = 0;
@@ -250,30 +253,34 @@ namespace pathfinder_combat_simulator
 
 	class damage_request {
 	public:
-		damage_request(attack_outcome this_attack_outcome, int crit_multiplier, shared_ptr<damage_strategy> dmg_strategy) :
-			this_attack_outcome(this_attack_outcome), crit_multiplier(crit_multiplier), dmg_strategy(dmg_strategy) { }
+		damage_request(attack_outcome this_attack_outcome, int crit_multiplier, shared_ptr<damage_strategy> dmg_strategy, int attribute_modifier) :
+			this_attack_outcome(this_attack_outcome), crit_multiplier(crit_multiplier), dmg_strategy(dmg_strategy), attribute_modifier(attribute_modifier) { }
 
 		attack_outcome this_attack_outcome;
-		int crit_multiplier;
+		int crit_multiplier = 2;  // RAW says always 2
+		int attribute_modifier;
 		
 		shared_ptr<damage_strategy> dmg_strategy;
 	};
 
 	class attack_request {
 	public:
-		attack_request(int p_unmodified_attack_roll, int p_attack_bonus, int p_minimum_crit, int p_armor_class) 
-			//: unmodified_attack_roll(p_unmodified_attack_roll), attack_bonus(p_attack_bonus), minimum_crit(p_minimum_crit), armor_class(p_armor_class) 
+		attack_request(int p_unmodified_attack_roll, int p_attack_bonus, int p_minimum_crit, int p_armor_class, int p_crit_confirmation_roll, int p_attackers_str_or_dex_modifier)
 		{ 
 			unmodified_attack_roll = p_unmodified_attack_roll;
 			attack_bonus = p_attack_bonus;
 			minimum_crit = p_minimum_crit;
 			armor_class = p_armor_class;
+			crit_confirmation_roll = p_crit_confirmation_roll;
+			str_modifier = p_attackers_str_or_dex_modifier;
 		}
 
 		int unmodified_attack_roll;
 		int attack_bonus;
 		int minimum_crit;
 		int armor_class;
+		int crit_confirmation_roll;
+		int str_modifier;
 	};
 
 	class data_access

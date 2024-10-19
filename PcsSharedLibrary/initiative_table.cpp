@@ -1,6 +1,7 @@
 #include <algorithm>
-
 #include "types.h"
+
+
 
 using namespace pathfinder_combat_simulator;
 

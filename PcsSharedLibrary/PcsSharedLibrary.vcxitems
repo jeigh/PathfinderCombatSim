@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <ItemsProjectGuid>{0326d626-1d92-4926-92a2-f849c6b28478}</ItemsProjectGuid>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(MSBuildThisFileDirectory)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectCapability Include="SourceItemsFromImports" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)attack_abstraction.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)attack_process.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)battle.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)combat_process.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)combat_team.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)data_access.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)dice_manager.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)initiative_table.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)mobile_object.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)mob_ai.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)pf_ranges.h" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)user_interface.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)types.h" />
+  </ItemGroup>
+</Project>
