@@ -14,7 +14,7 @@ attack_outcome attack_abstraction::get_attack_outcome(shared_ptr<attack_request>
 	int modified_attack_roll = request->unmodified_attack_roll + request->attack_bonus;
 	int modified_crit_roll = request->crit_confirmation_roll + request->attack_bonus;
 	
-	bool is_a_crit_if_it_hits = crit_is_nat_20 || modified_crit_roll >= request->minimum_crit;
+	bool is_a_crit_if_it_hits = attack_is_nat_20 && (crit_is_nat_20 || modified_crit_roll >= request->minimum_crit);
 	bool is_a_hit = attack_is_nat_20 || modified_attack_roll >= request->armor_class;
 
 	if (attack_is_nat_1) return attack_outcome::miss;

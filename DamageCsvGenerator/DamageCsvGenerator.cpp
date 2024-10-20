@@ -33,21 +33,18 @@ void GenerateDamagesForRanges(pf_ranges& input_ranges, std::shared_ptr<pathfinde
     {
         for (auto this_attack_outcome : input_ranges.attack_outcomes)
         {
-            for (int armor_class : input_ranges.armor_classes)
+            for (int crit_multiplier : input_ranges.crit_multipliers)
             {
-                for (int crit_multiplier : input_ranges.crit_multipliers)
+                for (int damage_dice_count : input_ranges.damage_dice_count)
                 {
-                    for (int damage_dice_count : input_ranges.damage_dice_count)
+                    for (int die_size : input_ranges.die_sizes)
                     {
-                        for (float statistical_damage_mean : input_ranges.mean_damages)
-                        {
-                            auto dmg_strategy = make_shared<statistical_mean_damage_strategy>(damage_dice_count, statistical_damage_mean);
-                            auto dmg_req = make_shared<damage_request>(this_attack_outcome, crit_multiplier, dmg_strategy, attribute_modifier);
-                            auto expected_result = atk->get_damage_outcome(dmg_req);
+                        auto dmg_strategy = make_shared<statistical_mean_damage_strategy>(damage_dice_count, die_size);
+                        auto dmg_req = make_shared<damage_request>(this_attack_outcome, crit_multiplier, dmg_strategy, attribute_modifier);
+                        auto expected_result = atk->get_damage_outcome(dmg_req);
 
-                            dal->persist_damage_results(damage_dice_count, statistical_damage_mean, dmg_req, expected_result);
-                            di++;
-                        }
+                        dal->persist_damage_results(damage_dice_count, die_size, dmg_req, expected_result);
+                        di++;
                     }
                 }
             }

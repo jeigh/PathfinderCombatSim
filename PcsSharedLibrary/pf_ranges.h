@@ -32,10 +32,9 @@ public:
     vector<int> crit_multipliers = vector<int>{ 2 };
 
     // the string representing the damage dice
-    vector<string> damage_dice_options = vector<string>{ "1d3", "1d4", "1d6", "1d8", "1d10", "1d12", "1d20" };
-
-    // the predicted mean of the die
-    vector<float> mean_damages = vector<float>{ 2.0f,  2.5f,  3.5f,  4.5f,  5.5f,   6.5f,   10.5f };
+    vector<string> damage_dice_options = vector<string> { "1d3",    "1d4",  "1d6",  "1d8",  "1d10", "1d12", "1d20" };
+    /*vector<float> mean_damages = vector<float>          { 2.0f,     2.5f,   3.5f,   4.5f,   5.5f,   6.5f,   10.5f };*/
+	vector<int> die_sizes = vector<int>                 { 3,        4,      6,      8,      10,     12,     20 };
 
     // how many damage dice to roll
     vector<int> damage_dice_count = vector<int>{ 1, 2 };

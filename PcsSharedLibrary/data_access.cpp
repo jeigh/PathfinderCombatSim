@@ -20,27 +20,26 @@ void data_access::persist_attack_results(shared_ptr<attack_request> request, att
 			<< "unmodified_attack_roll,"
 			<< "attackers_str_or_dex_modifier,"
 			<< "crit_confirmation_roll,"
-			<< "attack_outcome"
-			<< std::endl;
+			<< "attack_outcome";
 
 	}
 		
 
 	_attackfile 
+		<< std::endl
 		<< request->attack_bonus << ","
 		<< request->armor_class << ","
 		<< request->minimum_crit << ","
 		<< request->unmodified_attack_roll << ","
 		<< request->str_modifier << ","
 		<< request->crit_confirmation_roll << ","
-		<< static_cast<int>(outcome) 
-		<< std::endl;
+		<< static_cast<int>(outcome);
 
 	//_db_mutex->unlock();
 
 }
 
-void data_access::persist_damage_results(int damage_dice_count, float statistical_damage_mean, shared_ptr<damage_request> request, float expected_result)
+void data_access::persist_damage_results(int damage_dice_count, int die_size, shared_ptr<damage_request> request, float expected_result)
 {
 	//_db_mutex->lock();
 
@@ -48,25 +47,24 @@ void data_access::persist_damage_results(int damage_dice_count, float statistica
 	{
 		_damagefile.open(this->_damage_scenario_file_name, std::ios::out);
 
-		_damagefile
+		_damagefile 
 			<< "attack_outcome,"
 			<< "damage_dice_count,"
-			<< "statistical_damage_mean,"
+			<< "die_size,"
 			<< "crit_multiplier,"
 			<< "attribute_modifier,"
-			<< "estimated_damage"
-			<< std::endl;
+			<< "estimated_damage";
 
 	}
 
 	_damagefile
+		<< std::endl
 		<< static_cast<int>(request->this_attack_outcome) << ","
 		<< damage_dice_count << ","
-		<< statistical_damage_mean << ","
+		<< die_size << ","
 		<< request->crit_multiplier << ","
 		<< request->attribute_modifier << ","
-		<< expected_result
-		<< std::endl;
+		<< expected_result;
 
 	//_db_mutex->unlock();
 }

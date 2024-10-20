@@ -15,8 +15,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CPlusPlus", "CPlusPlus", "{
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{79C5E600-15A8-4604-B254-E9C80EE2540F}"
 	ProjectSection(SolutionItems) = preProject
-		CPlusPlus\PathfinderCombatSimulator.ConsoleCpp\attack_scenarios.csv = CPlusPlus\PathfinderCombatSimulator.ConsoleCpp\attack_scenarios.csv
-		CPlusPlus\PathfinderCombatSimulator.ConsoleCpp\damage_scenarios.csv = CPlusPlus\PathfinderCombatSimulator.ConsoleCpp\damage_scenarios.csv
+		AttackCsvGenerator\attack_scenarios.csv = AttackCsvGenerator\attack_scenarios.csv
+		DamageCsvGenerator\damage_scenarios.csv = DamageCsvGenerator\damage_scenarios.csv
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AttackCsvGenerator", "AttackCsvGenerator\AttackCsvGenerator.vcxproj", "{340E2FE0-7CD5-4C36-9F24-80707313631F}"

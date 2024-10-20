@@ -290,12 +290,19 @@ namespace pathfinder_combat_simulator
 		explicit data_access(shared_ptr<std::shared_mutex> db_mutex) : _db_mutex(db_mutex) {}
 		~data_access()
 		{
-			if (_attackfile.is_open()) _attackfile.close();
-			if (_damagefile.is_open()) _damagefile.close();
+			if (_attackfile.is_open()) 
+			{
+				_attackfile.close();
+			}
+			if (_damagefile.is_open()) 
+			{
+				_damagefile.close();
+			}
 		}
 
 		void persist_attack_results(shared_ptr<attack_request> request, attack_outcome outcome);
-		void persist_damage_results(int damage_dice_count, float statistical_damage_mean, shared_ptr<damage_request> request, float expected_result);
+		//void persist_damage_results(int damage_dice_count, float statistical_damage_mean, shared_ptr<damage_request> request, float expected_result);
+		void persist_damage_results(int damage_dice_count, int die_size, shared_ptr<damage_request> request, float expected_result);
 
 	private:
 		std::string _attack_scenario_file_name = "attack_scenarios.csv";
