@@ -117,9 +117,8 @@ int main()
     if (!getchar()) return 0;
 
     auto rng = make_shared<dice_manager>();
+    auto atk = make_shared<attack_abstraction>(rng);
     auto dal = make_shared<data_access>(make_shared<std::shared_mutex>());
-
-    auto atk = make_shared<attack_abstraction>(rng, dal);
 
     original_combat_stuff(rng, dal, atk, run_single_threaded);
 }

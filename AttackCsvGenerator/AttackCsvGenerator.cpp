@@ -77,7 +77,7 @@ void main()
     srand(static_cast<unsigned int>(seed));
     auto rng = make_shared<dice_manager>();
     auto dal = make_shared<data_access>(make_shared<std::shared_mutex>());
-    auto atk = make_shared<attack_abstraction>(rng, dal);
+    auto atk = make_shared<attack_abstraction>(rng);
     auto input_ranges = pf_ranges();
 
     GenerateAttacksForRanges(input_ranges, atk, dal);

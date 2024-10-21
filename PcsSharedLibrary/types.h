@@ -265,6 +265,7 @@ namespace pathfinder_combat_simulator
 
 	class attack_request {
 	public:
+		attack_request() = default;
 		attack_request(int p_unmodified_attack_roll, int p_attack_bonus, int p_minimum_crit, int p_armor_class, int p_crit_confirmation_roll, int p_attackers_str_or_dex_modifier)
 		{ 
 			unmodified_attack_roll = p_unmodified_attack_roll;
@@ -275,12 +276,12 @@ namespace pathfinder_combat_simulator
 			str_modifier = p_attackers_str_or_dex_modifier;
 		}
 
-		int unmodified_attack_roll;
-		int attack_bonus;
-		int minimum_crit;
-		int armor_class;
-		int crit_confirmation_roll;
-		int str_modifier;
+		int unmodified_attack_roll = 0;
+		int attack_bonus = 0;
+		int minimum_crit = 0;
+		int armor_class = 0;
+		int crit_confirmation_roll = 0;
+		int str_modifier = 0;
 	};
 
 	class data_access
@@ -291,17 +292,13 @@ namespace pathfinder_combat_simulator
 		~data_access()
 		{
 			if (_attackfile.is_open()) 
-			{
 				_attackfile.close();
-			}
-			if (_damagefile.is_open()) 
-			{
+
+			if (_damagefile.is_open())
 				_damagefile.close();
-			}
 		}
 
 		void persist_attack_results(shared_ptr<attack_request> request, attack_outcome outcome);
-		//void persist_damage_results(int damage_dice_count, float statistical_damage_mean, shared_ptr<damage_request> request, float expected_result);
 		void persist_damage_results(int damage_dice_count, int die_size, shared_ptr<damage_request> request, float expected_result);
 
 	private:
@@ -317,7 +314,13 @@ namespace pathfinder_combat_simulator
 	class attack_abstraction
 	{
 	public:
-		attack_abstraction(shared_ptr<dice_manager> rng, shared_ptr<data_access> dal) : _rng(rng), _dal(dal) { }
+		attack_abstraction(
+			shared_ptr<dice_manager> rng 
+			//shared_ptr<data_access> dal
+		) : 
+			_rng(rng) 
+			//_dal(dal) 
+		{ }
 
 		attack_outcome get_attack_outcome(shared_ptr<attack_request> request);
 		float get_damage_outcome(shared_ptr<damage_request> request);
@@ -326,7 +329,7 @@ namespace pathfinder_combat_simulator
 		float get_damage_outcome(attack_outcome the_attack_outcome, int attackers_weapons_crit_multiplier,  shared_ptr<damage_strategy> dmg_strategy);
 
 		shared_ptr<dice_manager> _rng;
-		shared_ptr<data_access> _dal;
+		//shared_ptr<data_access> _dal;
 	};
 
 	class attack_process
