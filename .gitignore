@@ -361,3 +361,5 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/AttackCsvGenerator/attack_scenarios.csv
+/DamageCsvGenerator/damage_scenarios.csv

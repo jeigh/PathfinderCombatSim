@@ -25,9 +25,11 @@ auto attack_process::do_attack(
 		int m_ac = *modified_armor_class;
 		auto minimum_crit = attacker->default_attack->minimum_crit_;
 		auto second_parameter = attack_value - unmodified_attack_roll;
-		
-		auto atk_request = make_shared<attack_request>(unmodified_attack_roll, second_parameter, minimum_crit, m_ac);
-		
+		auto crit_confirmation_roll = _rng->roll(20);
+
+		//todo: support for other attribute modifiers than just strength.
+		auto attribute_modifier = attacker->current_str_modifier;		
+		auto atk_request = make_shared<attack_request>(unmodified_attack_roll, second_parameter, minimum_crit, m_ac, crit_confirmation_roll, attribute_modifier);
 		auto attack_outcome = _attack_abstraction->get_attack_outcome(atk_request);
 
 		if (attack_outcome != attack_outcome::miss)
@@ -49,7 +51,8 @@ auto attack_process::do_attack(
 			auto crit_multiplier = 2;
 			auto the_damage_strategy = make_shared<roll_dice_damage_strategy>(_rng, dice_count, dice_size);
 
-			auto damageRequest = make_shared<damage_request>(attack_outcome, crit_multiplier, the_damage_strategy);
+
+			auto damageRequest = make_shared<damage_request>(attack_outcome, crit_multiplier, the_damage_strategy, attribute_modifier);
 			auto physical_damage = _attack_abstraction->get_damage_outcome(damageRequest);
 
 			//todo: update to work with more than just physical damage...
@@ -75,24 +78,6 @@ auto attack_process::do_attack(
 	}
 	return nullptr;
 }
-
-//shared_ptr< unordered_map<damage_type, int>> attack_process::roll_damage(vector<damage_effect> const damage_effects) const
-//{
-//	auto returnable = make_shared<unordered_map<damage_type, int>>();
-//
-//	for (damage_effect damage_effect : damage_effects)
-//	{
-//		int amount_to_add = _rng->add_rolls(damage_effect.damage_dice);
-//		damage_type key = damage_effect._damage_type;
-//
-//		if (returnable->contains(damage_effect._damage_type))
-//			returnable->insert_or_assign(key, returnable->at(key) + amount_to_add);
-//		else
-//			returnable->insert({ key, amount_to_add });
-//	}
-//
-//	return returnable;
-//}
 
 [[nodiscard]] int attack_process::apply_attack_modifiers(shared_ptr<mobile_object> mob, int d20) const
 {
