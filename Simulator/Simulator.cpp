@@ -33,10 +33,10 @@ public:
 class combat_algorithm_tests
 {
 public:
-    explicit combat_algorithm_tests(const shared_ptr<combat_process>& combat_algorithm, int battle_id) : combatAlgorithm(combat_algorithm), battle_id_(battle_id) { }
+    explicit combat_algorithm_tests(shared_ptr<combat_process> combat_algorithm, int battle_id) : combatAlgorithm(combat_algorithm), battle_id_(battle_id) { }
 
 private:
-    shared_ptr<combat_process> combatAlgorithm;
+    shared_ptr<combat_process>  combatAlgorithm;
     int battle_id_;
 
 public:
@@ -68,14 +68,14 @@ public:
     }
 };
 
-void original_combat_stuff(shared_ptr<dice_manager> diceManager, shared_ptr<data_access> dal, shared_ptr<attack_abstraction> atk, bool run_single_threaded)
+void original_combat_stuff(dice_manager diceManager, shared_ptr<data_access> dal, attack_abstraction atk, bool run_single_threaded)
 {
 
     auto ui_mutex = std::make_shared<std::shared_mutex>();
     auto userInterface = make_shared<user_interface>(ui_mutex, output_level::low);
-    auto mobAi = make_shared <mob_ai>();
+    auto mobAi = mob_ai();
     auto db_mutex = std::make_shared<std::shared_mutex>();
-    auto attackProcess = make_shared<attack_process>(dal, diceManager, atk);
+    auto attackProcess = attack_process(diceManager, atk);
     auto combatAlgorithm = make_shared<combat_process>(diceManager, userInterface, mobAi, attackProcess);
 
     if (!run_single_threaded) {
@@ -116,8 +116,8 @@ int main()
 
     if (!getchar()) return 0;
 
-    auto rng = make_shared<dice_manager>();
-    auto atk = make_shared<attack_abstraction>(rng);
+    auto rng = dice_manager();
+    auto atk = attack_abstraction(rng);
     auto dal = make_shared<data_access>(make_shared<std::shared_mutex>());
 
     original_combat_stuff(rng, dal, atk, run_single_threaded);

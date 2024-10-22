@@ -30,10 +30,10 @@ float attack_abstraction::get_damage_outcome(shared_ptr<damage_request> request)
 
 	switch (request->this_attack_outcome) {
 	case attack_outcome::hit_and_crit:
-		returnable = request->dmg_strategy->get_damage_as_float() * request->crit_multiplier + request->attribute_modifier;
+		returnable = request->dmg_strategy.get_damage_as_float() * request->crit_multiplier + request->attribute_modifier;
 		break;
 	case attack_outcome::hit_no_crit:
-		returnable = request->dmg_strategy->get_damage_as_float() + request->attribute_modifier;
+		returnable = request->dmg_strategy.get_damage_as_float() + request->attribute_modifier;
 		break;
 	default:
 		returnable = 0.0f;
@@ -54,7 +54,7 @@ float roll_dice_damage_strategy::get_damage_as_float() const {
 
 	for (int i = 0; i < _damage_dice_count; i++)
 	{
-		returnable += _rng->roll(_damage_dice_size);
+		returnable += _rng.roll(_damage_dice_size);
 	}
 	return returnable;
 }

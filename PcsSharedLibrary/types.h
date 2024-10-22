@@ -102,27 +102,7 @@ namespace pathfinder_combat_simulator
 
 	};
 
-	class data_collection_payload {
-	private:
-		shared_ptr<mobile_object> attacker = nullptr;
-		shared_ptr<mobile_object> defender = nullptr;
 
-	public:
-		//todo: some of these need to be populated 
-		int unmodified_attack_roll = 0;
-		int attackers_momentary_attack_bonus = 0;
-		int defenders_momentary_ac = 0;
-		int attakcer_number_of_attacks_made_this_turn = 0;
-		bool attack_successfully_hits = false;
-		bool attacker_wins_battle = false;
-		int attackers_weapons_minimum_crit = 0;
-		int attackers_weapons_crit_multipler = 0;
-		float predicted_damage_if_hit = 0;
-
-
-		void set_attacker(shared_ptr<mobile_object> attacker) { this->attacker = attacker; }
-		void set_defender(shared_ptr<mobile_object> defender) { this->defender = defender; }
-	};
 
 	class battle
 	{
@@ -132,7 +112,7 @@ namespace pathfinder_combat_simulator
 
 		int id;
 		vector<shared_ptr<combat_team>> combat_teams;
-		vector<shared_ptr<data_collection_payload>> collected_data = vector<shared_ptr<data_collection_payload>>();
+		
 		void round_ends();
 
 	private:
@@ -253,14 +233,14 @@ namespace pathfinder_combat_simulator
 
 	class damage_request {
 	public:
-		damage_request(attack_outcome this_attack_outcome, int crit_multiplier, shared_ptr<damage_strategy> dmg_strategy, int attribute_modifier) :
+		damage_request(attack_outcome this_attack_outcome, int crit_multiplier, damage_strategy & dmg_strategy, int attribute_modifier) :
 			this_attack_outcome(this_attack_outcome), crit_multiplier(crit_multiplier), dmg_strategy(dmg_strategy), attribute_modifier(attribute_modifier) { }
 
 		attack_outcome this_attack_outcome;
 		int crit_multiplier = 2;  // RAW says always 2
 		int attribute_modifier;
 		
-		shared_ptr<damage_strategy> dmg_strategy;
+		damage_strategy & dmg_strategy;
 	};
 
 	class attack_request {
@@ -314,13 +294,7 @@ namespace pathfinder_combat_simulator
 	class attack_abstraction
 	{
 	public:
-		attack_abstraction(
-			shared_ptr<dice_manager> rng 
-			//shared_ptr<data_access> dal
-		) : 
-			_rng(rng) 
-			//_dal(dal) 
-		{ }
+		attack_abstraction(dice_manager rng) : _rng(rng) { }
 
 		attack_outcome get_attack_outcome(shared_ptr<attack_request> request);
 		float get_damage_outcome(shared_ptr<damage_request> request);
@@ -328,31 +302,29 @@ namespace pathfinder_combat_simulator
 		attack_outcome get_attack_outcome(int unmodified_attack_roll, int attackers_attack_bonus, int attackers_weapons_minimum_crit, int defenders_ac);
 		float get_damage_outcome(attack_outcome the_attack_outcome, int attackers_weapons_crit_multiplier,  shared_ptr<damage_strategy> dmg_strategy);
 
-		shared_ptr<dice_manager> _rng;
-		//shared_ptr<data_access> _dal;
+		dice_manager & _rng;
 	};
 
 	class attack_process
 	{
 	public:
-		attack_process(shared_ptr<data_access> dal, shared_ptr<dice_manager> rng, shared_ptr<attack_abstraction> attack_logic) : _dal(dal), _rng(rng), _attack_abstraction(attack_logic) { }
+		attack_process(dice_manager & rng, attack_abstraction & attack_logic) :  _rng(rng), _attack_abstraction(attack_logic) { }
 
 		auto do_attack(shared_ptr<battle> the_battle, shared_ptr<mobile_object> const attacker, shared_ptr<mobile_object> const victim)->shared_ptr<attack_results>;
 		[[nodiscard]] int apply_attack_modifiers(shared_ptr<mobile_object> mob, int d20) const;
 
 	private:
-		shared_ptr<dice_manager> _rng;
-		shared_ptr<data_access> _dal;
-		shared_ptr<attack_abstraction> _attack_abstraction;
+		dice_manager & _rng;
+		attack_abstraction & _attack_abstraction;
 
 		[[nodiscard]] shared_ptr<int> calculate_modified_ac(shared_ptr<mobile_object> const victim) const;
-		void collect_data_payload(const std::shared_ptr<pathfinder_combat_simulator::mobile_object>& attacker, const std::shared_ptr<pathfinder_combat_simulator::mobile_object>& victim, const int unmodified_attack_roll);
+		
 	};
 
 	class combat_process
 	{
 	public:
-		combat_process(shared_ptr<dice_manager> rng, shared_ptr<user_interface> ui, shared_ptr<mob_ai> ai, shared_ptr<attack_process> attack_process) :
+		combat_process(dice_manager &  rng, shared_ptr<user_interface> ui, mob_ai & ai, attack_process & attack_process) :
 			_rng(rng), _ui(ui), _ai(ai), _attack_process(attack_process)
 		{ }
 
@@ -363,10 +335,10 @@ namespace pathfinder_combat_simulator
 		void process_battle_until_only_one_team_is_concious(const shared_ptr<battle>);
 
 	private:
-		shared_ptr<dice_manager> _rng;
+		dice_manager & _rng;
 		shared_ptr<user_interface> _ui;
-		shared_ptr<mob_ai> _ai;
-		shared_ptr<attack_process> _attack_process;
+		mob_ai & _ai;
+		attack_process & _attack_process;
 
 
 		[[nodiscard]] bool still_lives(shared_ptr<combat_team> const acg) const;
@@ -391,13 +363,13 @@ namespace pathfinder_combat_simulator
 	class roll_dice_damage_strategy : public damage_strategy
 	{
 	public:
-		roll_dice_damage_strategy(shared_ptr<dice_manager> rng, int damage_dice_count, int damage_dice_size) : damage_strategy(damage_dice_count, damage_dice_size) 
-		{ 
-			_rng = rng;
-		}
+		roll_dice_damage_strategy(dice_manager & rng, int damage_dice_count, int damage_dice_size) : 
+			damage_strategy(damage_dice_count, damage_dice_size),  
+			_rng(rng) 
+		{ }
 
 		float get_damage_as_float() const;
 	private:
-		shared_ptr<dice_manager> _rng;
+		dice_manager & _rng;
 	};
 }

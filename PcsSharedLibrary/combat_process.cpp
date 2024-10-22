@@ -8,7 +8,7 @@ using std::logic_error;
 
 int combat_process::roll_initiative(shared_ptr<mobile_object> const actor) const
 {
-	return actor->perception_skill_check_modifier + _rng->roll(20);
+	return actor->perception_skill_check_modifier + _rng.roll(20);
 }
 
 bool combat_process::is_combat_still_active(vector<shared_ptr<combat_team>> const combat_groups) const
@@ -74,11 +74,11 @@ void combat_process::process_action(
 	int const action_number,
 	shared_ptr<mobile_object> acting_mob) 
 {
-	shared_ptr<mobile_object> target_mob = _ai->get_target_for(acting_mob, the_battle->combat_teams);
+	shared_ptr<mobile_object> target_mob = _ai.get_target_for(acting_mob, the_battle->combat_teams);
 	if (target_mob != nullptr && !acting_mob->is_dead() && !acting_mob->is_unconcious())
 	{
 		shared_ptr<mobile_object> victim = target_mob;
-		auto results = _attack_process->do_attack(the_battle, acting_mob, victim);
+		auto results = _attack_process.do_attack(the_battle, acting_mob, victim);
 
 		if (results != nullptr && results->target_mob != nullptr)
 		{

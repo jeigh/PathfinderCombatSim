@@ -18,19 +18,19 @@ auto attack_process::do_attack(
 {
 	if (attacker->default_attack != nullptr)
 	{
-		int unmodified_attack_roll = _rng->roll(20);
+		int unmodified_attack_roll = _rng.roll(20);
 		int attack_value = apply_attack_modifiers(attacker, unmodified_attack_roll);
 
 		shared_ptr<int> modified_armor_class = calculate_modified_ac(victim);
 		int m_ac = *modified_armor_class;
 		auto minimum_crit = attacker->default_attack->minimum_crit_;
 		auto second_parameter = attack_value - unmodified_attack_roll;
-		auto crit_confirmation_roll = _rng->roll(20);
+		auto crit_confirmation_roll = _rng.roll(20);
 
 		//todo: support for other attribute modifiers than just strength.
 		auto attribute_modifier = attacker->current_str_modifier;		
 		auto atk_request = make_shared<attack_request>(unmodified_attack_roll, second_parameter, minimum_crit, m_ac, crit_confirmation_roll, attribute_modifier);
-		auto attack_outcome = _attack_abstraction->get_attack_outcome(atk_request);
+		auto attack_outcome = _attack_abstraction.get_attack_outcome(atk_request);
 
 		if (attack_outcome != attack_outcome::miss)
 		{
@@ -49,11 +49,11 @@ auto attack_process::do_attack(
 			}
 
 			auto crit_multiplier = 2;
-			auto the_damage_strategy = make_shared<roll_dice_damage_strategy>(_rng, dice_count, dice_size);
+			auto the_damage_strategy = roll_dice_damage_strategy(_rng, dice_count, dice_size);
 
 
 			auto damageRequest = make_shared<damage_request>(attack_outcome, crit_multiplier, the_damage_strategy, attribute_modifier);
-			auto physical_damage = _attack_abstraction->get_damage_outcome(damageRequest);
+			auto physical_damage = _attack_abstraction.get_damage_outcome(damageRequest);
 
 			//todo: update to work with more than just physical damage...
 			if (physical_damage > 0)
@@ -72,7 +72,7 @@ auto attack_process::do_attack(
 			return returnable;
 		}
 		
-		collect_data_payload(attacker, victim, unmodified_attack_roll);
+		
 
 		attacker->number_of_previous_attacks_made_this_turn += 1;
 	}
@@ -94,17 +94,3 @@ auto attack_process::calculate_modified_ac(shared_ptr<mobile_object> const victi
 	return modified_armor_class;
 }
 
-void pathfinder_combat_simulator::attack_process::collect_data_payload(
-	const shared_ptr<mobile_object>& attacker,
-	const shared_ptr<mobile_object>& victim,
-	const int unmodified_attack_roll)
-{
-	auto addable = std::make_unique<data_collection_payload>();
-
-	addable->set_attacker(attacker);
-	addable->set_defender(victim);
-
-	addable->attackers_momentary_attack_bonus = attacker->default_attack->attack_modifier_;
-	addable->defenders_momentary_ac = *calculate_modified_ac(victim);
-	addable->unmodified_attack_roll = unmodified_attack_roll;
-}

@@ -11,6 +11,7 @@
 #include "types.h"
 #include "pf_ranges.h"
 
+
 using std::vector;
 using std::unordered_map;
 using std::string;
@@ -24,7 +25,7 @@ using std::make_shared;
 
 using namespace pathfinder_combat_simulator;
 
-void GenerateAttacksForRanges(pf_ranges& input_ranges, std::shared_ptr<pathfinder_combat_simulator::attack_abstraction> atk, std::shared_ptr<pathfinder_combat_simulator::data_access> dal)
+void GenerateAttacksForRanges(pf_ranges& input_ranges, attack_abstraction& atk, std::shared_ptr<pathfinder_combat_simulator::data_access> dal)
 {
     // attack loop
     int ai = 0;
@@ -53,7 +54,7 @@ void GenerateAttacksForRanges(pf_ranges& input_ranges, std::shared_ptr<pathfinde
                             float returnable = 0.0f;
 
                             auto attack_req = make_shared<attack_request>(unmodified_attack_roll, attack_bonus, minimum_crit, armor_class, confirmation_roll, attribute_modifier);
-                            auto this_attack_outcome = atk->get_attack_outcome(attack_req);
+                            auto this_attack_outcome = atk.get_attack_outcome(attack_req);
 
                             dal->persist_attack_results(attack_req, this_attack_outcome);
                             ai++;
@@ -75,9 +76,9 @@ void main()
     auto run_single_threaded = true;
     auto seed = time(nullptr);
     srand(static_cast<unsigned int>(seed));
-    auto rng = make_shared<dice_manager>();
+    auto rng = dice_manager();
     auto dal = make_shared<data_access>(make_shared<std::shared_mutex>());
-    auto atk = make_shared<attack_abstraction>(rng);
+    auto atk = attack_abstraction(rng);
     auto input_ranges = pf_ranges();
 
     GenerateAttacksForRanges(input_ranges, atk, dal);

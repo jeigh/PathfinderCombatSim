@@ -18,7 +18,7 @@ void data_access::persist_attack_results(shared_ptr<attack_request> request, att
 			<< "armor_class,"
 			<< "minimum_crit,"
 			<< "unmodified_attack_roll,"
-			<< "attackers_str_or_dex_modifier,"
+			<< "ability_score_modifier,"
 			<< "crit_confirmation_roll,"
 			<< "attack_outcome";
 

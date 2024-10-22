@@ -8,7 +8,8 @@ using std::make_shared;
 using namespace pathfinder_combat_simulator;
 
 attack_abstraction create_unit_under_test() {
-	return attack_abstraction(make_shared<dice_manager>());
+	auto rng = dice_manager();
+	return attack_abstraction(rng );
 }
 
 TEST(AttackAbstractionTest, GetAttackOutcomeReturnsMissWhenAttackRollIs1) {
@@ -107,7 +108,7 @@ TEST(AttackAbstractionTest, GetAttackOutcomeReturnsMissWhenAttackRollIsLessThanA
 TEST(AttackAbstractionTest, GetDamageOutcome_HitAndCrit)
 {
     // Arrange
-    shared_ptr<damage_strategy> dmgStrategy = std::make_shared<statistical_mean_damage_strategy>(2, 6);
+    auto dmgStrategy = statistical_mean_damage_strategy(2, 6);
     shared_ptr<damage_request> request = std::make_shared<damage_request>(attack_outcome::hit_and_crit, 2, dmgStrategy, 3);
     auto abstraction = create_unit_under_test();
     // Act
@@ -120,7 +121,8 @@ TEST(AttackAbstractionTest, GetDamageOutcome_HitAndCrit)
 TEST(AttackAbstractionTest, GetDamageOutcome_HitNoCrit)
 {
     // Arrange
-    shared_ptr<damage_strategy> dmgStrategy = make_shared<roll_dice_damage_strategy>(make_shared<dice_manager>(), 3, 8);
+	auto rng = dice_manager();
+    auto dmgStrategy = roll_dice_damage_strategy(rng, 3, 8);
     shared_ptr<damage_request> request = make_shared<damage_request>(attack_outcome::hit_no_crit, 1, dmgStrategy, 2);
     auto abstraction = create_unit_under_test();
 
@@ -134,7 +136,7 @@ TEST(AttackAbstractionTest, GetDamageOutcome_HitNoCrit)
 TEST(AttackAbstractionTest, GetDamageOutcome_Default)
 {
     // Arrange
-    shared_ptr<damage_strategy> dmgStrategy = make_shared<statistical_mean_damage_strategy>(1, 4);
+    auto dmgStrategy = statistical_mean_damage_strategy(1, 4);
     shared_ptr<damage_request> request = make_shared<damage_request>(attack_outcome::miss, 1, dmgStrategy, 0);
     auto abstraction = create_unit_under_test();
 

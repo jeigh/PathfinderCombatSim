@@ -24,7 +24,7 @@ using std::make_shared;
 
 using namespace pathfinder_combat_simulator;
 
-void GenerateDamagesForRanges(pf_ranges& input_ranges, std::shared_ptr<pathfinder_combat_simulator::attack_abstraction> atk, std::shared_ptr<pathfinder_combat_simulator::data_access> dal)
+void GenerateDamagesForRanges(pf_ranges& input_ranges, attack_abstraction& atk, std::shared_ptr<pathfinder_combat_simulator::data_access> dal)
 {
     // damage loop
     int di = 0;
@@ -39,9 +39,9 @@ void GenerateDamagesForRanges(pf_ranges& input_ranges, std::shared_ptr<pathfinde
                 {
                     for (int die_size : input_ranges.die_sizes)
                     {
-                        auto dmg_strategy = make_shared<statistical_mean_damage_strategy>(damage_dice_count, die_size);
+                        auto dmg_strategy = statistical_mean_damage_strategy(damage_dice_count, die_size);
                         auto dmg_req = make_shared<damage_request>(this_attack_outcome, crit_multiplier, dmg_strategy, attribute_modifier);
-                        auto expected_result = atk->get_damage_outcome(dmg_req);
+                        auto expected_result = atk.get_damage_outcome(dmg_req);
 
                         dal->persist_damage_results(damage_dice_count, die_size, dmg_req, expected_result);
                         di++;
@@ -58,10 +58,10 @@ int main()
     auto run_single_threaded = true;
     auto seed = time(nullptr);
     srand(static_cast<unsigned int>(seed));
-    auto rng = make_shared<dice_manager>();
+    auto rng = dice_manager();
     auto dal = make_shared<data_access>(make_shared<std::shared_mutex>());
-    auto atk = make_shared<attack_abstraction>(rng);
+    auto atk = attack_abstraction(rng);
     auto input_ranges = pf_ranges();
 
-    GenerateDamagesForRanges(input_ranges, atk, dal);
+	GenerateDamagesForRanges(input_ranges, atk, dal);
 }
